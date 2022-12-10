@@ -47,7 +47,7 @@ Polyfill is only supported & tested on latest Major versions of Android Gradle P
     
 |  AGP Version  | Latest Support Version |
 |:-------------:|:----------------------:|
-|  7.0.x~7.3.x  |         0.1.0          |
+|  7.0.x~7.3.x  |           /            |
 
 
 ## Git Commit Check
