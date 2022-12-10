@@ -21,21 +21,10 @@ dependencies {
     testImplementation(deps.android.gradle.plugin)
 }
 
-
+// To include the AGP and other testImplementation deps into classpath.
 tasks.withType<PluginUnderTestMetadata>().configureEach {
-    dependsOn("compileKotlin", "compileTestKotlin", "compileJava", "compileTestJava", "compileFunctionalTestJava", "compileIntegrationTestJava")
-    dependsOn("processResources", "processTestResources", "processIntegrationTestResources", "processFunctionalTestResources")
-
-    pluginClasspath.setFrom(/* reset */)
-
-    pluginClasspath.from(configurations.compileClasspath)
-    pluginClasspath.from(configurations.testCompileClasspath)
-    pluginClasspath.from(configurations["integrationTestCompileClasspath"])
-    pluginClasspath.from(configurations["functionalTestCompileClasspath"])
-    pluginClasspath.from(configurations.runtimeClasspath)
     pluginClasspath.from(provider { sourceSets.test.get().runtimeClasspath.files })
 }
-
 
 val deleteOldInstrumentedTests by tasks.registering(Delete::class) {
     delete(layout.buildDirectory.dir("test-samples"))
