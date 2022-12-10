@@ -34,4 +34,4 @@ dependencyResolutionManagement {
     }
 }
 
-include(":caliper")// "functional-test")
+include(":caliper", ":gradle-instrumented-kit")

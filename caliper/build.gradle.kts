@@ -1,34 +1,116 @@
 plugins {
     `kotlin-dsl`
     id("java-gradle-plugin")
-//    `github-release`
+    `github-release`
 //    `maven-central-publish`
+}
+
+version = BuildConfig.Versions.caliperVersion
+
+dependencies {
+    // Basis
+    implementation(gradleApi())
+    implementation(deps.kotlin.std)
+    implementation(deps.android.gradle.pluginapi)
+    compileOnly(deps.android.gradle.plugin)
+
+    // Tests
+    testImplementation(deps.hamcrest)
+    testImplementation(deps.mockk)
+    testImplementation(gradleTestKit())
+    testImplementation(deps.android.gradle.plugin)
+}
+
+
+tasks.withType<PluginUnderTestMetadata>().configureEach {
+    dependsOn("compileKotlin", "compileTestKotlin", "compileJava", "compileTestJava", "compileFunctionalTestJava", "compileIntegrationTestJava")
+    dependsOn("processResources", "processTestResources", "processIntegrationTestResources", "processFunctionalTestResources")
+
+    pluginClasspath.setFrom(/* reset */)
+
+    pluginClasspath.from(configurations.compileClasspath)
+    pluginClasspath.from(configurations.testCompileClasspath)
+    pluginClasspath.from(configurations["integrationTestCompileClasspath"])
+    pluginClasspath.from(configurations["functionalTestCompileClasspath"])
+    pluginClasspath.from(configurations.runtimeClasspath)
+    pluginClasspath.from(provider { sourceSets.test.get().runtimeClasspath.files })
+}
+
+
+val deleteOldInstrumentedTests by tasks.registering(Delete::class) {
+    delete(layout.buildDirectory.dir("test-samples"))
+}
+
+testing {
+    suites {
+        val test by getting(JvmTestSuite::class) {
+            useJUnitJupiter()
+        }
+
+        val integrationTest by registering(JvmTestSuite::class) {
+            dependencies {
+                implementation(project())
+                implementation(project(":gradle-instrumented-kit"))
+            }
+            targets {
+                all {
+                    testTask.configure {
+                        shouldRunAfter(test)
+                        dependsOn(deleteOldInstrumentedTests)
+                    }
+                }
+            }
+        }
+
+        val functionalTest by registering(JvmTestSuite::class) {
+            dependencies {
+                implementation(project())
+                implementation(project(":gradle-instrumented-kit"))
+            }
+            targets {
+                all {
+                    testTask.configure {
+                        shouldRunAfter(test)
+                        dependsOn(deleteOldInstrumentedTests)
+                    }
+                }
+            }
+        }
+    }
+}
+
+configurations["integrationTestImplementation"]
+    .extendsFrom(configurations["testImplementation"])
+configurations["functionalTestImplementation"]
+    .extendsFrom(configurations["testImplementation"])
+
+tasks.check.configure {
+    dependsOn(tasks.named("test"))
+    dependsOn(tasks.named("integrationTest"))
+    dependsOn(tasks.named("functionalTest"))
+}
+
+tasks.withType<Test> {
+    testLogging {
+        this.showStandardStreams = true
+    }
 }
 
 java {
     withSourcesJar()
-    sourceCompatibility = JavaVersion.VERSION_1_8
-    targetCompatibility = JavaVersion.VERSION_1_8
+    toolchain {
+        languageVersion.set(JavaLanguageVersion.of(11))
+    }
 }
 
 gradlePlugin {
     plugins {
-        create("caliper") {
+        register("caliper") {
             id = "me.2bab.caliper"
             implementationClass ="me.xx2bab.caliper.CaliperPlugin"
             displayName = "me.2bab.caliper"
         }
     }
-}
-
-dependencies {
-    implementation(deps.polyfill.main)
-
-    implementation(gradleApi())
-    implementation(deps.kotlin.std)
-    implementation(deps.kotlin.serialization)
-
-    compileOnly(deps.android.gradle.plugin)
-
-    testImplementation(gradleTestKit())
+    testSourceSets.add(sourceSets["integrationTest"])
+    testSourceSets.add(sourceSets["functionalTest"])
 }
