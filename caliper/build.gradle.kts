@@ -13,10 +13,14 @@ dependencies {
     implementation(deps.kotlin.std)
     implementation(deps.android.gradle.pluginapi)
     compileOnly(deps.android.gradle.plugin)
+    implementation(deps.asm.core)
+    implementation(deps.asm.commons)
+    implementation(deps.asm.util)
 
     // Tests
     testImplementation(deps.hamcrest)
     testImplementation(deps.mockk)
+    testImplementation(deps.kotlin.compile.testing)
     testImplementation(gradleTestKit())
     testImplementation(deps.android.gradle.plugin)
 }

@@ -1,0 +1,133 @@
+package me.xx2bab.caliper.proxy
+
+import com.tschuchort.compiletesting.KotlinCompilation
+import com.tschuchort.compiletesting.KotlinCompilation.Result
+import com.tschuchort.compiletesting.KotlinCompilation.ExitCode
+import com.tschuchort.compiletesting.SourceFile
+import me.xx2bab.caliper.core.CaliperASMManipulator
+import me.xx2bab.caliper.core.MethodProxy
+import me.xx2bab.caliper.core.ProxyConfig
+import org.hamcrest.MatcherAssert.assertThat
+import org.junit.jupiter.api.BeforeAll
+import org.junit.jupiter.api.Test
+import org.objectweb.asm.Opcodes.INVOKESTATIC
+
+class SettingsSecureProxyTest {
+
+    companion object {
+        const val mockAndroidId = "123"
+        lateinit var result: Result
+
+        @BeforeAll
+        @JvmStatic
+        fun setup() {
+            val settings = SourceFile.java(
+                "Settings.java", """
+                package android.provider;
+                import android.content.ContentResolver;
+                public final class Settings {
+                    public static final class Secure {
+                        public static String getString(ContentResolver resolver, String name) {
+                            return "12345";
+                        }
+                    }
+                }        
+            """
+            )
+
+            val contentResolver = SourceFile.java(
+                "ContentResolver.java", """
+                package android.content;
+                public class ContentResolver {}
+            """.trimIndent()
+            )
+
+            val testCaseFile = SourceFile.kotlin(
+                "TestCase.kt", """
+                import android.provider.Settings
+                import android.content.ContentResolver           
+                
+                class TestCase() {
+                    companion object {                                
+                        val crAsStaticProp = ContentResolver()
+                        val androidIdAsStaticProp = Settings.Secure.getString(crAsStaticProp, "android_id")                       
+                    }
+    
+                    val crAsClassProp = ContentResolver()
+                    val androidIdAsClassProp: String = Settings.Secure.getString(crAsClassProp, "android_id")
+    
+                    fun getAndroidId(): String {
+                        println("androidIdAsClassProp:${'$'}androidIdAsClassProp")
+                        val cr = ContentResolver()
+                        return Settings.Secure.getString(cr, "android_id")
+                    }
+                }
+            """.trimIndent()
+            )
+
+            val replacedCaller = SourceFile.java(
+                "Caliper.java", """
+                package me.xx2bab.caliper.runtime;
+                import android.content.ContentResolver;
+                import android.provider.Settings;
+    
+                public class Caliper {            
+                    public static String getString(ContentResolver resolver, String name) {
+                        return "123";
+                    }           
+                }
+            """.trimIndent()
+            )
+
+            result = KotlinCompilation().apply {
+                sources = listOf(settings, contentResolver, testCaseFile, replacedCaller)
+                inheritClassPath = true
+                messageOutputStream = System.out // see diagnostics in real time
+            }.compile()
+            result.printAll()
+        }
+    }
+
+    @Test
+    fun `Test files compilation goes well`() {
+        assertThat(
+            "Compilation throws unexpected error.",
+            result.exitCode == ExitCode.OK
+        )
+    }
+
+    @Test
+    fun `Hook the AndroidId retrieval successfully`() {
+        val compiledTestClassFile = result.getCompiledFileByName("TestCase.class")
+        val asmManipulator = CaliperASMManipulator(
+            inputClassFile = compiledTestClassFile,
+            config = ProxyConfig(
+                methodProxyList = listOf(
+                    MethodProxy(
+                        opcode = INVOKESTATIC,
+                        className = "android/provider/Settings\$Secure",
+                        methodName = "getString"
+                    )
+                )
+            ),
+        )
+        asmManipulator.processInPlace()
+
+        val testCaseClass = result.classLoader.loadClass("TestCase")
+        val testCase = testCaseClass.getDeclaredConstructor().newInstance()
+        val androidIdByMethod = testCase.invokeMethod(testCaseClass, "getAndroidId")
+        assertThat("The androidId should be 123, however it's $androidIdByMethod.", androidIdByMethod == mockAndroidId)
+        val androidIdByClassProp = testCase.getFieldValueInString(testCaseClass, "androidIdAsClassProp")
+        assertThat(
+            "The androidId2 should be 123, however it's $androidIdByClassProp.",
+            androidIdByClassProp == mockAndroidId
+        )
+        val androidIdByStaticProp = testCase.getFieldValueInString(testCaseClass, "androidIdAsStaticProp")
+        assertThat(
+            "The androidId2 should be 123, however it's $androidIdByStaticProp.",
+            androidIdByStaticProp == mockAndroidId
+        )
+    }
+
+
+}

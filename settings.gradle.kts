@@ -34,4 +34,4 @@ dependencyResolutionManagement {
     }
 }
 
-include(":caliper", ":gradle-instrumented-kit")
+include(":caliper", ":caliper-runtime", ":gradle-instrumented-kit")
