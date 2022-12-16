@@ -7,6 +7,7 @@ import com.tschuchort.compiletesting.SourceFile
 import me.xx2bab.caliper.core.CaliperASMManipulator
 import me.xx2bab.caliper.core.MethodProxy
 import me.xx2bab.caliper.core.ProxyConfig
+import me.xx2bab.caliper.tool.checkByteCodeIntegrity
 import org.hamcrest.MatcherAssert.assertThat
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
@@ -73,7 +74,7 @@ class SettingsSecureProxyTest {
     
                 public class Caliper {            
                     public static String getString(ContentResolver resolver, String name) {
-                        return "123";
+                        return "$mockAndroidId";
                     }           
                 }
             """.trimIndent()
@@ -113,18 +114,24 @@ class SettingsSecureProxyTest {
         )
         asmManipulator.processInPlace()
 
+        val errorLog = compiledTestClassFile.checkByteCodeIntegrity()
+        assertThat(
+            "The revised class file does not pass the integrity check, the reason is:\n $errorLog",
+            errorLog == null
+        )
+
         val testCaseClass = result.classLoader.loadClass("TestCase")
         val testCase = testCaseClass.getDeclaredConstructor().newInstance()
         val androidIdByMethod = testCase.invokeMethod(testCaseClass, "getAndroidId")
-        assertThat("The androidId should be 123, however it's $androidIdByMethod.", androidIdByMethod == mockAndroidId)
+        assertThat("The androidId should be $mockAndroidId, however it's $androidIdByMethod.", androidIdByMethod == mockAndroidId)
         val androidIdByClassProp = testCase.getFieldValueInString(testCaseClass, "androidIdAsClassProp")
         assertThat(
-            "The androidId2 should be 123, however it's $androidIdByClassProp.",
+            "The androidId2 should be $mockAndroidId, however it's $androidIdByClassProp.",
             androidIdByClassProp == mockAndroidId
         )
         val androidIdByStaticProp = testCase.getFieldValueInString(testCaseClass, "androidIdAsStaticProp")
         assertThat(
-            "The androidId2 should be 123, however it's $androidIdByStaticProp.",
+            "The androidId2 should be $mockAndroidId, however it's $androidIdByStaticProp.",
             androidIdByStaticProp == mockAndroidId
         )
     }
