@@ -1,12 +1,14 @@
 package me.xx2bab.gradle.caliper.sample
 
 import android.os.Bundle
+import android.os.Build
 import android.provider.Settings
+import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 
 class MainActivity : AppCompatActivity() {
 
-    val a = Caliper.getString(contentResolver, "android_id")
+    private val serial = Build.SERIAL
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -17,9 +19,32 @@ class MainActivity : AppCompatActivity() {
         return Settings.Secure.getString(contentResolver, "android_id")
     }
 
-    private fun getAndroidId2(): String {
+    private fun getAndroidIdProxy(): String {
         return Caliper.getString(contentResolver, "android_id")
     }
 
+    @RequiresApi(Build.VERSION_CODES.O)
+    private fun getAndroidSerial(): String {
+        return Build.getSerial()
+    }
+
+    private fun getAndroidSerialProxy(): String {
+        return Caliper.getSerial()
+    }
+
+    @RequiresApi(Build.VERSION_CODES.O)
+    private fun getAndroidSerialField(): String {
+        return Build.SERIAL
+    }
+
+    @RequiresApi(Build.VERSION_CODES.O)
+    private fun getAndroidSerialFieldProxy(): String {
+        return Caliper.SERIAL
+    }
+
+    @RequiresApi(Build.VERSION_CODES.O)
+    private fun getAndroidBrandField(): String {
+        return Build.BRAND
+    }
 }
 

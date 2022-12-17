@@ -27,7 +27,7 @@ class CaliperASMManipulator(
                 interfaces: Array<out String>?
             ) {
                 super.visit(version, access, name, signature, superName, interfaces)
-                println("visitClass $name")
+                logger.info("visit $name")
                 tempClassName = name ?: ""
             }
 
@@ -38,6 +38,7 @@ class CaliperASMManipulator(
                 signature: String?,
                 exceptions: Array<out String>?
             ): MethodVisitor {
+                logger.info("visit $methodName")
                 val sv = super.visitMethod(access, methodName, descriptor, signature, exceptions)
                 return CaliperMethodVisitor(access, descriptor, signature, sv, tempClassName, methodName, config)
             }

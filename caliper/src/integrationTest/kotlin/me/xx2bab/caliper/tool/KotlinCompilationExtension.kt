@@ -4,7 +4,7 @@ import com.tschuchort.compiletesting.KotlinCompilation.Result
 import java.io.File
 
 fun Result.getCompiledFileByName(fileName: String): File = compiledClassAndResourceFiles
-    .find { it.name == "TestCase.class" }!!
+    .find { it.name == fileName }!!
 
 /**
  * For debug usage when tests throw errors.

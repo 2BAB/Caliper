@@ -8,6 +8,9 @@ import me.xx2bab.caliper.core.CaliperASMManipulator
 import me.xx2bab.caliper.core.MethodProxy
 import me.xx2bab.caliper.core.ProxyConfig
 import me.xx2bab.caliper.tool.checkByteCodeIntegrity
+import me.xx2bab.caliper.tool.getFieldValueInString
+import me.xx2bab.caliper.tool.invokeMethod
+import me.xx2bab.caliper.tool.printAllMethods
 import org.hamcrest.MatcherAssert.assertThat
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
@@ -44,11 +47,11 @@ class SettingsSecureProxyTest {
             )
 
             val testCaseFile = SourceFile.kotlin(
-                "TestCase.kt", """
+                "TestCaseForSecure.kt", """                
                 import android.provider.Settings
                 import android.content.ContentResolver           
                 
-                class TestCase() {
+                class TestCaseForSecure() {
                     companion object {                                
                         val crAsStaticProp = ContentResolver()
                         val androidIdAsStaticProp = Settings.Secure.getString(crAsStaticProp, "android_id")                       
@@ -82,7 +85,7 @@ class SettingsSecureProxyTest {
 
             result = KotlinCompilation().apply {
                 sources = listOf(settings, contentResolver, testCaseFile, replacedCaller)
-                inheritClassPath = true
+
                 messageOutputStream = System.out // see diagnostics in real time
             }.compile()
             result.printAll()
@@ -99,7 +102,7 @@ class SettingsSecureProxyTest {
 
     @Test
     fun `Hook the AndroidId retrieval successfully`() {
-        val compiledTestClassFile = result.getCompiledFileByName("TestCase.class")
+        val compiledTestClassFile = result.getCompiledFileByName("TestCaseForSecure.class")
         val asmManipulator = CaliperASMManipulator(
             inputClassFile = compiledTestClassFile,
             config = ProxyConfig(
@@ -109,7 +112,8 @@ class SettingsSecureProxyTest {
                         className = "android/provider/Settings\$Secure",
                         methodName = "getString"
                     )
-                )
+                ),
+                fieldProxyList = listOf()
             ),
         )
         asmManipulator.processInPlace()
@@ -120,8 +124,9 @@ class SettingsSecureProxyTest {
             errorLog == null
         )
 
-        val testCaseClass = result.classLoader.loadClass("TestCase")
+        val testCaseClass = result.classLoader.loadClass("TestCaseForSecure")
         val testCase = testCaseClass.getDeclaredConstructor().newInstance()
+        // testCaseClass.printAllMethods()
         val androidIdByMethod = testCase.invokeMethod(testCaseClass, "getAndroidId")
         assertThat("The androidId should be $mockAndroidId, however it's $androidIdByMethod.", androidIdByMethod == mockAndroidId)
         val androidIdByClassProp = testCase.getFieldValueInString(testCaseClass, "androidIdAsClassProp")
@@ -131,7 +136,7 @@ class SettingsSecureProxyTest {
         )
         val androidIdByStaticProp = testCase.getFieldValueInString(testCaseClass, "androidIdAsStaticProp")
         assertThat(
-            "The androidId2 should be $mockAndroidId, however it's $androidIdByStaticProp.",
+            "The androidId3 should be $mockAndroidId, however it's $androidIdByStaticProp.",
             androidIdByStaticProp == mockAndroidId
         )
     }
