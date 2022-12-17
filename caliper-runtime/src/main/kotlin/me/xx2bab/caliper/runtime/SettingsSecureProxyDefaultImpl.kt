@@ -1,6 +1,6 @@
 package me.xx2bab.caliper.runtime
 
-class DefaultSettingsSecureProxy: SettingsSecureProxy {
+class SettingsSecureProxyDefaultImpl: SettingsSecureProxy {
 
     override fun getString(): String {
         return ""

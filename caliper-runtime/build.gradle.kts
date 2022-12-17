@@ -23,5 +23,5 @@ android {
 }
 
 dependencies {
-
+    compileOnly(deps.asm.core)
 }
