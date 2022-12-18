@@ -1,4 +1,4 @@
-package me.xx2bab.caliper.runtime.anno
+package me.xx2bab.caliper.anno
 
 /**
  * An annotation that indicates a target function is going to be proxied by the annotated function.
@@ -13,7 +13,7 @@ package me.xx2bab.caliper.runtime.anno
     AnnotationTarget.FUNCTION
 )
 @Retention(AnnotationRetention.SOURCE)
-annotation class ProxyMethod(
+annotation class CaliperMethodProxy(
     val className: String,
     val methodName: String,
     val opcode: Int

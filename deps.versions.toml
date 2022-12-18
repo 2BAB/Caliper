@@ -1,5 +1,5 @@
 [versions]
-kotlinVer = "1.7.21"
+kotlinVer = "1.7.22"
 agpVer = "7.2.2"
 polyfillVer = "0.8.0"
 asmVer = "9.4"
@@ -14,6 +14,7 @@ polyfill-manifest = { module = "me.2bab:polyfill-manifest", version.ref = "polyf
 asm-core = { module = "org.ow2.asm:asm", version.ref = "asmVer"}
 asm-commons = { module = "org.ow2.asm:asm-commons", version.ref = "asmVer"}
 asm-util = { module = "org.ow2.asm:asm-util", version.ref = "asmVer"}
+ksp-api = { module = "com.google.devtools.ksp:symbol-processing-api", version = "1.7.22-1.0.8" }
 junit = { module = "junit:junit", version = "4.12" }
 hamcrest = { module = "org.hamcrest:hamcrest-library", version = "2.2" }
 mockk = { module = "io.mockk:mockk", version = "1.13.2" }

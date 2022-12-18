@@ -9,6 +9,7 @@ pluginManagement {
             when (requested.id.namespace) {
                 "com.android" ->
                     useModule("com.android.tools.build:gradle:${getVersion("agpVer")}")
+
                 "org.jetbrains.kotlin" ->
                     useModule("org.jetbrains.kotlin:kotlin-gradle-plugin:${getVersion("kotlinVer")}")
             }
@@ -34,4 +35,14 @@ dependencyResolutionManagement {
     }
 }
 
-include(":caliper", ":caliper-runtime", ":gradle-instrumented-kit")
+include(
+    ":caliper-annotation",
+    ":caliper-annotation-processor",
+
+    ":caliper-gradle-plugin",
+    ":gradle-instrumented-kit",
+
+    ":caliper-runtime",
+    ":caliper-runtime-battery-metric",
+    ":caliper-runtime-sensitive-permission",
+)

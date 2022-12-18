@@ -49,7 +49,7 @@ if (enabledCompositionBuild) {
     includeBuild(externalDependencyBaseDir) {
         dependencySubstitution {
             substitute(module("me.2bab:caliper"))
-                .with(project(":caliper"))
+                .using(project(":caliper-gradle-plugin"))
         }
     }
 }
