@@ -23,5 +23,6 @@ android {
 }
 
 dependencies {
+    implementation(projects.caliperAnnotation)
     compileOnly(deps.asm.core)
 }
