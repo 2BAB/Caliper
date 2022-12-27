@@ -12,6 +12,7 @@ object SettingsSecureProxy {
         methodName = "getString",
         opcode = ASMOpcodes.INVOKESTATIC
     )
+    @JvmStatic
     fun getString(): String {
         return ""
     }

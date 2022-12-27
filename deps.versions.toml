@@ -19,6 +19,7 @@ junit = { module = "junit:junit", version = "4.12" }
 hamcrest = { module = "org.hamcrest:hamcrest-library", version = "2.2" }
 mockk = { module = "io.mockk:mockk", version = "1.13.2" }
 kotlin-compile-testing = { module = "com.github.tschuchortdev:kotlin-compile-testing", version = "1.4.9"}
+kotlin-compile-testing-ksp = { module = "com.github.tschuchortdev:kotlin-compile-testing-ksp", version = "1.4.9"}
 
 
 [bundles]

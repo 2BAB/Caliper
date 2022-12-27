@@ -5,8 +5,7 @@ package me.xx2bab.caliper.anno
  * More instruction can be found in [CaliperMethodProxy] comments.
  */
 @Target(
-    AnnotationTarget.FIELD,
-    AnnotationTarget.FUNCTION
+    AnnotationTarget.CLASS
 )
 @Retention(AnnotationRetention.SOURCE)
 annotation class CaliperClassProxy(
