@@ -4,6 +4,8 @@
 
 A monitor for Android Sensitive Permission/API based on bytecode transformation.
 
+Inspired by [allenymt/PrivacySentry](https://github.com/allenymt/PrivacySentry).
+
 ## Quick Start
 
 **0x01. Add the plugin to classpath:**
@@ -64,7 +66,7 @@ So far we haven't added any hook tool, but follow the regex below:
 ## License
 
 >
-> Copyright 2018-2022 2BAB
+> Copyright 2018-2023 2BAB
 >
 > Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the License. You may obtain a copy of the License at
 >
