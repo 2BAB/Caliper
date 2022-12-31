@@ -33,10 +33,11 @@ class MethodProxyWrapperGenTest {
     fun `Test Java file generation`() {
         val proxyWrittenInJava = SourceFile.java(
             "ProxyWrittenInJava.java", """
+                package me.xx2bab.caliper.test;
                 import me.xx2bab.caliper.anno.CaliperMethodProxy;
                 public class ProxyWrittenInJava {            
                     @CaliperMethodProxy(
-                        className = "android/provider/Settings\${'$'}Secure",
+                        className = "android/provider/Settings${'$'}Secure",
                         methodName = "getString",
                         opcode = ${ASMOpcodes.INVOKESTATIC}
                     )
@@ -57,17 +58,18 @@ class MethodProxyWrapperGenTest {
         }.compile()
         val kspGenDir = compilationTool.kspSourcesDir
 
-        val targetFile = File(kspGenDir, "")
+        val targetFile = File(kspGenDir, "java/${Constants.CALIPER_PACKAGE_FOR_WRAPPER.replace(".", "/")}/ProxyWrittenInJava_CaliperWrapper.java")
 
-        val targetContent = """
-            package me.xx2bab.caliper.wrapper;                   
-            public class ProxyWrittenInJava_CaliperWrapper {                                
-                 public static String getString(String name) {
-                     Caliper.visitMethod("android/provider/Settings\${'$'}Secure", "getString", name)
-                     return ProxyWrittenInJava.getString(name);
-                 }           
-            }                                                              
-            """.trimIndent()
+        val targetContent = "package me.xx2bab.caliper.runtime.wrapper;\n" +
+                "\n" +
+                "import java.lang.String;\n" +
+                "\n" +
+                "public final class ProxyWrittenInJava_CaliperWrapper {\n" +
+                "    public static String getString(String name) {\n" +
+                "        // Caliper.visitMethod(\"android/provider/Settings\$Secure\",\"getString\",name);\n" +
+                "        return me.xx2bab.caliper.test.ProxyWrittenInJava.getString(name);\n" +
+                "    }\n" +
+                "}\n"
 
         assertThat("", targetFile.readText() == targetContent)
     }

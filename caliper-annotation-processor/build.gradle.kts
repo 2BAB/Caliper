@@ -6,6 +6,10 @@ dependencies {
     implementation(projects.caliperAnnotation)
     implementation(deps.kotlin.std)
     implementation(deps.ksp.api)
+    implementation(deps.javapoet)
+    implementation(deps.kotlinpoet)
+    implementation(deps.kotlinpoet.interop.javapoet)
+    implementation(deps.kotlinpoet.interop.ksp)
 
     testImplementation(projects.caliperAnnotation)
     testImplementation(deps.hamcrest)
