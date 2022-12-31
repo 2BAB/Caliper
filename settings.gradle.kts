@@ -34,6 +34,7 @@ dependencyResolutionManagement {
         }
     }
 }
+rootProject.name = "caliper-root"
 
 include(
     ":caliper-annotation",
