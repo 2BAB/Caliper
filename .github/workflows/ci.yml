@@ -63,5 +63,5 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-${{ github.job }}-
       - run: |
-          ./gradlew clean :caliper:check
+          ./gradlew clean check
 
