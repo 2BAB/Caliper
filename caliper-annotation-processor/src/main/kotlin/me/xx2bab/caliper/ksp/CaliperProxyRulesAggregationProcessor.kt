@@ -58,18 +58,6 @@ class CaliperProxyRulesAggregationProcessor(
     @OptIn(KotlinPoetJavaPoetPreview::class)
     inner class MetaCollector : KSVisitorVoid() {
 
-        override fun visitPropertyDeclaration(property: KSPropertyDeclaration, data: Unit) {
-            super.visitPropertyDeclaration(property, data)
-            logger.info("visitPropertyDeclaration")
-
-            // We don't allow top level function
-            if (property.parentDeclaration is KSClassDeclaration) {
-
-            } else {
-                logger.error(ERROR_ILLEGAL_CLASS_STRUCTURE)
-            }
-        }
-
         override fun visitFunctionDeclaration(function: KSFunctionDeclaration, data: Unit) {
             super.visitFunctionDeclaration(function, data)
             logger.info("visitFunctionDeclaration")
