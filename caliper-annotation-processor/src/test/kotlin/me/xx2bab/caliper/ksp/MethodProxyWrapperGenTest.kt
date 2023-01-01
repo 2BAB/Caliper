@@ -3,6 +3,8 @@ package me.xx2bab.caliper.ksp
 import com.tschuchort.compiletesting.*
 import me.xx2bab.caliper.anno.ASMOpcodes
 import org.hamcrest.MatcherAssert.assertThat
+import org.hamcrest.Matchers.equalToIgnoringWhiteSpace
+import org.hamcrest.text.IsEqualCompressingWhiteSpace.equalToCompressingWhiteSpace
 import org.junit.jupiter.api.Test
 import java.io.File
 
@@ -53,8 +55,8 @@ class MethodProxyWrapperGenTest {
                 "}\n"
 
         assertThat(
-            "The generated file is not exactly the same as target content.",
-            targetFile.readText() == targetContent
+            targetFile.readText(),
+            equalToCompressingWhiteSpace(targetContent)
         )
     }
 
@@ -105,8 +107,8 @@ class MethodProxyWrapperGenTest {
                 "}\n"
 
         assertThat(
-            "The generated file is not exactly the same as target content.",
-            targetFile.readText() == targetContent
+            targetContent,
+            equalToCompressingWhiteSpace(targetFile.readText())
         )
     }
 

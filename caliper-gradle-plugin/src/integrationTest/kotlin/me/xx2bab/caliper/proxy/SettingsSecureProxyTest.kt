@@ -12,6 +12,7 @@ import me.xx2bab.caliper.tool.getFieldValueInString
 import me.xx2bab.caliper.tool.invokeMethod
 import me.xx2bab.caliper.tool.printAllMethods
 import org.hamcrest.MatcherAssert.assertThat
+import org.hamcrest.Matchers.`is`
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.objectweb.asm.Opcodes.INVOKESTATIC
@@ -85,7 +86,6 @@ class SettingsSecureProxyTest {
 
             result = KotlinCompilation().apply {
                 sources = listOf(settings, contentResolver, testCaseFile, replacedCaller)
-
                 messageOutputStream = System.out // see diagnostics in real time
             }.compile()
             result.printAll()
@@ -94,10 +94,7 @@ class SettingsSecureProxyTest {
 
     @Test
     fun `Test files compilation goes well`() {
-        assertThat(
-            "Compilation throws unexpected error.",
-            result.exitCode == ExitCode.OK
-        )
+        assertThat(result.exitCode, `is`(ExitCode.OK))
     }
 
     @Test
@@ -128,16 +125,19 @@ class SettingsSecureProxyTest {
         val testCase = testCaseClass.getDeclaredConstructor().newInstance()
         // testCaseClass.printAllMethods()
         val androidIdByMethod = testCase.invokeMethod(testCaseClass, "getAndroidId")
-        assertThat("The androidId should be $mockAndroidId, however it's $androidIdByMethod.", androidIdByMethod == mockAndroidId)
+        assertThat(
+            androidIdByMethod,
+            `is`(mockAndroidId)
+        )
         val androidIdByClassProp = testCase.getFieldValueInString(testCaseClass, "androidIdAsClassProp")
         assertThat(
-            "The androidId2 should be $mockAndroidId, however it's $androidIdByClassProp.",
-            androidIdByClassProp == mockAndroidId
+            androidIdByClassProp,
+            `is`(mockAndroidId)
         )
         val androidIdByStaticProp = testCase.getFieldValueInString(testCaseClass, "androidIdAsStaticProp")
         assertThat(
-            "The androidId3 should be $mockAndroidId, however it's $androidIdByStaticProp.",
-            androidIdByStaticProp == mockAndroidId
+            androidIdByStaticProp,
+            `is`(mockAndroidId)
         )
     }
 

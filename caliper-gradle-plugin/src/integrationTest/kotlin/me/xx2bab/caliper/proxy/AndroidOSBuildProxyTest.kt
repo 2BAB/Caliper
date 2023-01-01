@@ -9,6 +9,7 @@ import me.xx2bab.caliper.core.ProxyConfig
 import me.xx2bab.caliper.tool.checkByteCodeIntegrity
 import me.xx2bab.caliper.tool.invokeMethod
 import org.hamcrest.MatcherAssert
+import org.hamcrest.Matchers.`is`
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.objectweb.asm.Opcodes
@@ -69,8 +70,8 @@ class AndroidOSBuildProxyTest {
     @Test
     fun `Test files compilation goes well`() {
         MatcherAssert.assertThat(
-            "Compilation throws unexpected error.",
-            result.exitCode == KotlinCompilation.ExitCode.OK
+            result.exitCode,
+            `is`(KotlinCompilation.ExitCode.OK)
         )
     }
 
@@ -102,8 +103,8 @@ class AndroidOSBuildProxyTest {
         val testCase = testCaseClass.getDeclaredConstructor().newInstance()
         val serial = testCase.invokeMethod(testCaseClass, "getAndroidSerial")
         MatcherAssert.assertThat(
-            "The serial should be ${MOCK_SERIAL_ID}, however it's $serial.",
-            serial == MOCK_SERIAL_ID
+            serial,
+            `is`(MOCK_SERIAL_ID)
         )
     }
 
