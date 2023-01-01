@@ -52,7 +52,6 @@ class CaliperProxyRulesAggregationProcessor(
         logger.lifecycle("finish")
         logger.lifecycle("metadataMap size: ${metadataMap.size}")
         val generator = CaliperWrapperGenerator(metadataMap, codeGenerator, logger)
-        generator.checkDuplication()
         generator.generate()
     }
 
@@ -131,7 +130,6 @@ class CaliperProxyRulesAggregationProcessor(
             }
 
             metaData.methods.add(proxyMethod)
-
         }
 
     }

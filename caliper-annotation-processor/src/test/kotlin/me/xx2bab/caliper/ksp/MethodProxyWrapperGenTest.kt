@@ -7,27 +7,6 @@ import org.junit.jupiter.api.Test
 import java.io.File
 
 class MethodProxyWrapperGenTest {
-    val proxyWrittenInKt = SourceFile.kotlin("ProxyWrittenInKt.kt", """
-        import me.xx2bab.caliper.anno.CaliperMethodProxy
-        import me.xx2bab.caliper.anno.CaliperClassProxy
-        @CaliperClassProxy(
-            className = "ABC",
-            opcode = 1
-        )
-        object ProxyWrittenInKt {
-            @CaliperMethodProxy(
-                className = "android/provider/Settings\${'$'}Secure",
-                methodName = "getString",
-                opcode = ${ASMOpcodes.INVOKESTATIC}
-            )
-            @JvmStatic
-            fun getString(): String {
-                return ""
-            }
-
-        }
-        """
-    )
 
     @Test
     fun `Test Java file generation`() {
@@ -52,13 +31,15 @@ class MethodProxyWrapperGenTest {
             sources = listOf(proxyWrittenInJava)
             inheritClassPath = true
             messageOutputStream = System.out // see diagnostics in real time
-            this.
-            symbolProcessorProviders = listOf(CaliperProxyRulesAggregationProcessorProvider())
+            this.symbolProcessorProviders = listOf(CaliperProxyRulesAggregationProcessorProvider())
             kspWithCompilation = true
         }.compile()
         val kspGenDir = compilationTool.kspSourcesDir
 
-        val targetFile = File(kspGenDir, "java/${Constants.CALIPER_PACKAGE_FOR_WRAPPER.replace(".", "/")}/ProxyWrittenInJava_CaliperWrapper.java")
+        val targetFile = File(
+            kspGenDir,
+            "java/${Constants.CALIPER_PACKAGE_FOR_WRAPPER.replace(".", "/")}/ProxyWrittenInJava_CaliperWrapper.java"
+        )
 
         val targetContent = "package me.xx2bab.caliper.runtime.wrapper;\n" +
                 "\n" +
@@ -71,7 +52,62 @@ class MethodProxyWrapperGenTest {
                 "    }\n" +
                 "}\n"
 
-        assertThat("", targetFile.readText() == targetContent)
+        assertThat(
+            "The generated file is not exactly the same as target content.",
+            targetFile.readText() == targetContent
+        )
+    }
+
+    @Test
+    fun `Test Kotlin file generation`() {
+        val proxyWrittenInKt = SourceFile.kotlin(
+            "ProxyWrittenInKt.kt", """
+        package me.xx2bab.caliper.test;
+        import me.xx2bab.caliper.anno.CaliperMethodProxy 
+        object ProxyWrittenInKt {
+            @CaliperMethodProxy(
+                className = "android/provider/Settings\${'$'}Secure",
+                methodName = "getString",
+                opcode = ${ASMOpcodes.INVOKESTATIC}
+            )
+            @JvmStatic
+            fun getString(name: String): String {
+                return "123"
+            }
+        }
+        """
+        )
+
+        val compilationTool = KotlinCompilation()
+        val result = compilationTool.apply {
+            sources = listOf(proxyWrittenInKt)
+            inheritClassPath = true
+            messageOutputStream = System.out // see diagnostics in real time
+            this.symbolProcessorProviders = listOf(CaliperProxyRulesAggregationProcessorProvider())
+            kspWithCompilation = true
+        }.compile()
+        val kspGenDir = compilationTool.kspSourcesDir
+
+        val targetFile = File(
+            kspGenDir,
+            "java/${Constants.CALIPER_PACKAGE_FOR_WRAPPER.replace(".", "/")}/ProxyWrittenInKt_CaliperWrapper.java"
+        )
+
+        val targetContent = "package me.xx2bab.caliper.runtime.wrapper;\n" +
+                "\n" +
+                "import java.lang.String;\n" +
+                "\n" +
+                "public final class ProxyWrittenInKt_CaliperWrapper {\n" +
+                "    public static String getString(String name) {\n" +
+                "        // Caliper.visitMethod(\"android/provider/Settings\$Secure\",\"getString\",name);\n" +
+                "        return me.xx2bab.caliper.test.ProxyWrittenInKt.getString(name);\n" +
+                "    }\n" +
+                "}\n"
+
+        assertThat(
+            "The generated file is not exactly the same as target content.",
+            targetFile.readText() == targetContent
+        )
     }
 
 }

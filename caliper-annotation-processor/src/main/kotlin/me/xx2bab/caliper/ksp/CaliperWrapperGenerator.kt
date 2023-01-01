@@ -15,10 +15,6 @@ class CaliperWrapperGenerator(
     private val logger: KSPLoggerWrapper
 ) {
 
-    fun checkDuplication() {
-
-    }
-
     fun generate() {
         metadataMap.forEach { (className, metadata) ->
             val simpleClassName = className.split(".").last().toCaliperWrapperName()
@@ -36,7 +32,9 @@ class CaliperWrapperGenerator(
                     .returns(proxyMethod.returnType)
                     .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
                     .addParameters(inputParams)
-                    .addStatement("// Caliper.visitMethod(\"" + metadata.targetClassName.replace("$", "$$") + "\",\"${proxyMethod.methodName}\",$invokeParams)")
+                    .addStatement("// Caliper.visitMethod(\""
+                            + metadata.targetClassName.replace("$", "$$")
+                            + "\",\"${proxyMethod.methodName}\",$invokeParams)") // https://github.com/square/javapoet/issues/670
                     .addStatement("return $className.${proxyMethod.methodName}($invokeParams)")
                     .build()
             }

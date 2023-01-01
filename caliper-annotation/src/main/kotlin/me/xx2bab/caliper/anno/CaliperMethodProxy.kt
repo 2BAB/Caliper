@@ -9,9 +9,7 @@ package me.xx2bab.caliper.anno
  * - an interceptor [CaliperListener],
  * - a json file that will be consumed by the [caliper] module.
  */
-@Target(
-    AnnotationTarget.FUNCTION
-)
+@Target(AnnotationTarget.FUNCTION)
 @Retention(AnnotationRetention.SOURCE)
 annotation class CaliperMethodProxy(
     val className: String,
