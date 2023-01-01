@@ -7,6 +7,8 @@ import com.squareup.javapoet.TypeName
 import com.squareup.kotlinpoet.javapoet.KotlinPoetJavaPoetPreview
 import com.squareup.kotlinpoet.javapoet.toJTypeName
 import com.squareup.kotlinpoet.ksp.toTypeName
+import me.xx2bab.caliper.anno.CaliperClassProxy
+import me.xx2bab.caliper.anno.CaliperFieldProxy
 import kotlin.collections.getOrPut
 import me.xx2bab.caliper.anno.CaliperMethodProxy
 
@@ -32,15 +34,17 @@ class CaliperProxyRulesAggregationProcessor(
 
     companion object {
         const val ERROR_ILLEGAL_CLASS_STRUCTURE = "The annotated element is not wrapped by a class."
+        const val ERROR_MULTI_CALIPER_ANNOTATIONS =
+            "More than one Caliper annotation is found on the current element %s."
+        const val ERROR_NO_CALIPER_ANNOTATION = "No Caliper annotation is found on the current element %s."
     }
 
     override fun process(resolver: Resolver): List<KSAnnotated> {
         logger.lifecycle("process")
 
-        val symbols = resolver.getSymbolsWithAnnotation(
-            "me.xx2bab.caliper.anno.CaliperMethodProxy", true
-        )//CaliperMethodProxy::class.java.canonicalName)
-        logger.lifecycle("symbols: ${symbols.toList().size}")
+        val symbols = resolver.getSymbolsWithAnnotation(CaliperMethodProxy::class.qualifiedName!!)
+            .plus(resolver.getSymbolsWithAnnotation(CaliperFieldProxy::class.qualifiedName!!))
+        logger.lifecycle("Method + Field symbols: ${symbols.toList().size}")
 
         val ret = symbols.filter { !it.validate() }.toList()
         symbols.filter { it is KSFunctionDeclaration && it.validate() }.forEach { it.accept(MetaCollector(), Unit) }
@@ -61,9 +65,28 @@ class CaliperProxyRulesAggregationProcessor(
         override fun visitFunctionDeclaration(function: KSFunctionDeclaration, data: Unit) {
             super.visitFunctionDeclaration(function, data)
             logger.info("visitFunctionDeclaration")
-            val targetClassName = function.annotations
-                .first { it.shortName.asString() == CaliperMethodProxy::class.simpleName }
-                .arguments
+
+            val functionName = function.simpleName.asString()
+            logger.lifecycle("functionName = $functionName")
+
+            val methodProxyAnnotation =
+                function.annotations.firstOrNull { it.shortName.asString() == CaliperMethodProxy::class.simpleName }
+            val fieldProxyAnnotation =
+                function.annotations.firstOrNull { it.shortName.asString() == CaliperFieldProxy::class.simpleName }
+            if (methodProxyAnnotation != null && fieldProxyAnnotation != null) {
+                logger.error(ERROR_MULTI_CALIPER_ANNOTATIONS.format(functionName))
+                return
+            }
+            if (methodProxyAnnotation == null && fieldProxyAnnotation == null) {
+                logger.error(ERROR_NO_CALIPER_ANNOTATION.format(functionName))
+                return
+            }
+
+            val targetClassName = if (methodProxyAnnotation != null) {
+                methodProxyAnnotation!!
+            } else {
+                fieldProxyAnnotation!!
+            }.arguments
                 .first { it.name != null && it.name!!.asString() == "className" }
                 .value!!.toString()
 
@@ -71,6 +94,7 @@ class CaliperProxyRulesAggregationProcessor(
                 logger.error(ERROR_ILLEGAL_CLASS_STRUCTURE)
                 return
             }
+
             val currClass = function.parentDeclaration as KSClassDeclaration
             if (currClass.qualifiedName == null) {
                 logger.error(ERROR_ILLEGAL_CLASS_STRUCTURE)
@@ -80,11 +104,9 @@ class CaliperProxyRulesAggregationProcessor(
                 logger.error(ERROR_ILLEGAL_CLASS_STRUCTURE)
                 return
             }
+
             val className = currClass.qualifiedName!!.asString()
             logger.lifecycle("className = $className")
-
-            val functionName = function.simpleName.asString()
-            logger.lifecycle("functionName = $functionName")
 
             val functionReturnType = function.returnType?.toTypeName()?.toJTypeName()
             logger.lifecycle("functionReturnType = $functionReturnType")
@@ -95,14 +117,12 @@ class CaliperProxyRulesAggregationProcessor(
                 if (it.name != null) {
                     paramList.add(
                         MethodParam(
-                            paramName = it.name!!.getShortName(),
-                            type = it.type.toTypeName().toJTypeName()
+                            paramName = it.name!!.getShortName(), type = it.type.toTypeName().toJTypeName()
                         )
                     )
                 } else {
                     logger.error(
-                        "Can not parse the element's name of the type " +
-                                "${it.type.toTypeName().toString()}"
+                        "Can not parse the element's name of the type " + "${it.type.toTypeName().toString()}"
                     )
                 }
             }
@@ -113,7 +133,8 @@ class CaliperProxyRulesAggregationProcessor(
                     currClass.asStarProjectedType().toTypeName().toJTypeName(),
                     targetClassName = targetClassName,
                     currClass.containingFile!!,
-                    mutableListOf(), mutableListOf()
+                    mutableListOf(),
+                    mutableListOf()
                 )
             }
 
