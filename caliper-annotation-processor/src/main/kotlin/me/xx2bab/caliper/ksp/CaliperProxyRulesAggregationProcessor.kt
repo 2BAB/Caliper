@@ -82,13 +82,18 @@ class CaliperProxyRulesAggregationProcessor(
                 return
             }
 
-            val targetClassName = if (methodProxyAnnotation != null) {
+            val validAnno = if (methodProxyAnnotation != null) {
                 methodProxyAnnotation!!
             } else {
                 fieldProxyAnnotation!!
-            }.arguments
-                .first { it.name != null && it.name!!.asString() == "className" }
-                .value!!.toString()
+            }
+            val targetClassName = validAnno.getParamValueByKey("className").toString()
+            val targetElementName = if (methodProxyAnnotation != null) {
+                methodProxyAnnotation!!.getParamValueByKey("methodName").toString()
+            } else {
+                fieldProxyAnnotation!!.getParamValueByKey("fieldName").toString()
+            }
+            val targetOpcode = validAnno.getParamValueByKey("opcode") as Int
 
             if ((function.parentDeclaration is KSClassDeclaration).not()) {
                 logger.error(ERROR_ILLEGAL_CLASS_STRUCTURE)
@@ -127,14 +132,20 @@ class CaliperProxyRulesAggregationProcessor(
                 }
             }
 
-            val proxyMethod = ProxyMethod(functionName, paramList, functionReturnType)
+            val proxyMethod = ProxyMethod(
+                methodName = functionName,
+                params = paramList,
+                returnType = functionReturnType,
+                targetClassName = targetClassName,
+                targetElementName = targetElementName,
+                targetOpcode = targetOpcode,
+                targetType = validAnno.shortName.asString()
+            )
             val metaData = metadataMap.getOrPut(className) {
                 ProxyMetaData(
-                    currClass.asStarProjectedType().toTypeName().toJTypeName(),
-                    targetClassName = targetClassName,
-                    currClass.containingFile!!,
-                    mutableListOf(),
-                    mutableListOf()
+                    className = currClass.asStarProjectedType().toTypeName().toJTypeName(),
+                    sourceRef = currClass.containingFile!!,
+                    methods = mutableListOf()
                 )
             }
 
@@ -142,6 +153,10 @@ class CaliperProxyRulesAggregationProcessor(
         }
 
     }
+
+    private fun KSAnnotation.getParamValueByKey(key: String) = arguments
+        .first { it.name != null && it.name!!.asString() == key }
+        .value!!
 
 
 }

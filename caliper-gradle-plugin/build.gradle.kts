@@ -9,6 +9,7 @@ version = BuildConfig.Versions.caliperVersion
 
 dependencies {
     // Basis
+    implementation(projects.caliperAnnotation)
     implementation(gradleApi())
     implementation(deps.kotlin.std)
     implementation(deps.android.gradle.pluginapi)

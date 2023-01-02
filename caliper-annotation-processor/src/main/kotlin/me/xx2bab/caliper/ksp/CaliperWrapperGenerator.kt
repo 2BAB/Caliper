@@ -2,12 +2,19 @@ package me.xx2bab.caliper.ksp
 
 import com.google.devtools.ksp.processing.CodeGenerator
 import com.google.devtools.ksp.processing.Dependencies
+import com.squareup.javapoet.AnnotationSpec
 import com.squareup.javapoet.JavaFile
 import com.squareup.javapoet.MethodSpec
 import com.squareup.javapoet.ParameterSpec
 import com.squareup.javapoet.TypeSpec
-import javax.lang.model.element.Modifier
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
 import kotlin.text.StringBuilder
+import me.xx2bab.caliper.anno.CaliperMethodProxy
+import me.xx2bab.caliper.anno.ProxiedField
+import me.xx2bab.caliper.anno.ProxiedMetaData
+import me.xx2bab.caliper.anno.ProxiedMethod
+import javax.lang.model.element.Modifier
 
 class CaliperWrapperGenerator(
     private val metadataMap: Map<String, ProxyMetaData>,
@@ -17,43 +24,60 @@ class CaliperWrapperGenerator(
 
     fun generate() {
         metadataMap.forEach { (className, metadata) ->
-            val simpleClassName = className.split(".").last().toCaliperWrapperName()
+            val wrapperFullClassName = className.toCaliperWrapperName()
+            val wrapperSimpleClassName = className.split(".").last().toCaliperWrapperName()
+
+            val proxiedMetaData = ProxiedMetaData(mutableListOf(), mutableListOf())
             val methodSpecs = metadata.methods.map { proxyMethod ->
+                val isAnnotatedWithProxyMethod = proxyMethod.targetType == CaliperMethodProxy::class.simpleName
+                if (isAnnotatedWithProxyMethod) {
+                    val pm = ProxiedMethod(
+                        className = proxyMethod.targetClassName,
+                        methodName = proxyMethod.targetElementName,
+                        opcode = proxyMethod.targetOpcode,
+                        replacedClassName = wrapperFullClassName,
+                        replacedMethodName = proxyMethod.methodName
+                    )
+                    proxiedMetaData.proxiedMethods.add(pm)
+                } else {
+                    val pf = ProxiedField(
+                        className = proxyMethod.targetClassName,
+                        fieldName = proxyMethod.targetElementName,
+                        opcode = proxyMethod.targetOpcode,
+                        replacedClassName = wrapperFullClassName,
+                        replacedMethodName = proxyMethod.methodName
+                    )
+                    proxiedMetaData.proxiedFields.add(pf)
+                }
+
                 val inputParams = proxyMethod.params.map { methodParam ->
-                    ParameterSpec.builder(
-                        methodParam.type,
-                        methodParam.paramName
-                    ).build()
+                    ParameterSpec.builder(methodParam.type, methodParam.paramName).build()
                 }
 
                 val invokeParams = proxyMethod.params.joinToString(",") { it.paramName }
-                logger.lifecycle(metadata.targetClassName)
-                MethodSpec.methodBuilder(proxyMethod.methodName)
-                    .returns(proxyMethod.returnType)
-                    .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
-                    .addParameters(inputParams)
-                    .addStatement("// Caliper.visitMethod(\""
-                            + metadata.targetClassName.replace("$", "$$") // https://github.com/square/javapoet/issues/670
-                            + "\",\"${proxyMethod.methodName}\"" +
-                            "${if (invokeParams.isNullOrBlank()) "" else ","}$invokeParams)")
+                logger.lifecycle(proxyMethod.targetClassName)
+                MethodSpec.methodBuilder(proxyMethod.methodName).returns(proxyMethod.returnType)
+                    .addModifiers(Modifier.PUBLIC, Modifier.STATIC).addParameters(inputParams).addStatement(
+                        "// Caliper.visitMethod(\""
+                                + proxyMethod.targetClassName.replace("$", "$$") // https://github.com/square/javapoet/issues/670
+                                + "\",\"${proxyMethod.methodName}\"" + "${if (invokeParams.isNullOrBlank()) "" else ","}$invokeParams)"
+                    )
                     .addStatement("return $className.${proxyMethod.methodName}($invokeParams)")
                     .build()
             }
 
-            val classType = TypeSpec.classBuilder(simpleClassName)
-                .addModifiers(Modifier.PUBLIC, Modifier.FINAL)
-                .also { classBuilder ->
-                    classBuilder.addMethods(methodSpecs)
-                }
+            val annotationSpec = AnnotationSpec.builder(CaliperMeta::class.java)
+                .addMember("metadataInJSON", Json.encodeToString(proxiedMetaData).replace("$", "$$"))
                 .build()
-            val javaFile = JavaFile.builder(Constants.CALIPER_PACKAGE_FOR_WRAPPER, classType)
-                .indent("    ")
-                .build()
+
+            val classType = TypeSpec.classBuilder(wrapperSimpleClassName).addModifiers(Modifier.PUBLIC, Modifier.FINAL)
+                .addAnnotation(annotationSpec).addMethods(methodSpecs).build()
+            val javaFile = JavaFile.builder(Constants.CALIPER_PACKAGE_FOR_WRAPPER, classType).indent("    ").build()
 
             val fileOutputStream = codeGenerator.createNewFile(
                 dependencies = Dependencies(false, metadata.sourceRef),
                 packageName = Constants.CALIPER_PACKAGE_FOR_WRAPPER,
-                fileName = simpleClassName,
+                fileName = wrapperSimpleClassName,
                 extensionName = "java"
             )
             val sb = StringBuilder()

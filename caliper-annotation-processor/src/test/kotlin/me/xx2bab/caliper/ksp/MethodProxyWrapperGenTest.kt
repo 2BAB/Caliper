@@ -46,7 +46,11 @@ class MethodProxyWrapperGenTest {
         val targetContent = "package me.xx2bab.caliper.runtime.wrapper;\n" +
                 "\n" +
                 "import java.lang.String;\n" +
+                "import me.xx2bab.caliper.ksp.CaliperMeta;\n" +
                 "\n" +
+                "@CaliperMeta(\n" +
+                "        metadataInJSON = {\"proxiedMethods\":[{\"className\":\"android/provider/Settings\$Secure\",\"methodName\":\"getString\",\"opcode\":184,\"replacedClassName\":\"me.xx2bab.caliper.test.ProxyWrittenInJava_CaliperWrapper\",\"replacedMethodName\":\"getString\"}],\"proxiedFields\":[]}\n" +
+                ")\n" +
                 "public final class ProxyWrittenInJava_CaliperWrapper {\n" +
                 "    public static String getString(String name) {\n" +
                 "        // Caliper.visitMethod(\"android/provider/Settings\$Secure\",\"getString\",name);\n" +
@@ -98,13 +102,17 @@ class MethodProxyWrapperGenTest {
         val targetContent = "package me.xx2bab.caliper.runtime.wrapper;\n" +
                 "\n" +
                 "import java.lang.String;\n" +
+                "import me.xx2bab.caliper.ksp.CaliperMeta;\n" +
                 "\n" +
+                "@CaliperMeta(\n" +
+                "        metadataInJSON = {\"proxiedMethods\":[{\"className\":\"android/provider/Settings\$Secure\",\"methodName\":\"getString\",\"opcode\":184,\"replacedClassName\":\"me.xx2bab.caliper.test.ProxyWrittenInKt_CaliperWrapper\",\"replacedMethodName\":\"getString\"}],\"proxiedFields\":[]}\n" +
+                ")\n" +
                 "public final class ProxyWrittenInKt_CaliperWrapper {\n" +
                 "    public static String getString(String name) {\n" +
                 "        // Caliper.visitMethod(\"android/provider/Settings\$Secure\",\"getString\",name);\n" +
                 "        return me.xx2bab.caliper.test.ProxyWrittenInKt.getString(name);\n" +
                 "    }\n" +
-                "}\n"
+                "}"
 
         assertThat(
             targetContent,
