@@ -13,10 +13,10 @@ class MethodProxyWrapperGenTest {
     @Test
     fun `Test Java file generation`() {
         val proxyWrittenInJava = SourceFile.java(
-            "ProxyWrittenInJava.java", """
+            "ProxyWrittenInJavaForMethodProxy.java", """
                 package me.xx2bab.caliper.test;
                 import me.xx2bab.caliper.anno.CaliperMethodProxy;
-                public class ProxyWrittenInJava {            
+                public class ProxyWrittenInJavaForMethodProxy {            
                     @CaliperMethodProxy(
                         className = "android/provider/Settings${'$'}Secure",
                         methodName = "getString",
@@ -33,44 +33,33 @@ class MethodProxyWrapperGenTest {
             sources = listOf(proxyWrittenInJava)
             inheritClassPath = true
             messageOutputStream = System.out // see diagnostics in real time
-            this.symbolProcessorProviders = listOf(CaliperProxyRulesAggregationProcessorProvider())
+            // KSP
             kspWithCompilation = true
+            symbolProcessorProviders = listOf(CaliperProxyRulesAggregationProcessorProvider())
+            kspArgs = mutableMapOf<String, String>(Constants.KSP_OPTION_ANDROID_APP to "true")
         }.compile()
         val kspGenDir = compilationTool.kspSourcesDir
 
-        val targetFile = File(
+        val generatedClass = File(
             kspGenDir,
-            "java/${Constants.CALIPER_PACKAGE_FOR_WRAPPER.replace(".", "/")}/ProxyWrittenInJava_CaliperWrapper.java"
-        )
+            "java/${Constants.CALIPER_PACKAGE_FOR_WRAPPER.replace(".", "/")}/ProxyWrittenInJavaForMethodProxy_CaliperWrapper.java"
+        ).readText()
 
-        val targetContent = "package me.xx2bab.caliper.runtime.wrapper;\n" +
-                "\n" +
-                "import java.lang.String;\n" +
-                "import me.xx2bab.caliper.ksp.CaliperMeta;\n" +
-                "\n" +
-                "@CaliperMeta(\n" +
-                "        metadataInJSON = {\"proxiedMethods\":[{\"className\":\"android/provider/Settings\$Secure\",\"methodName\":\"getString\",\"opcode\":184,\"replacedClassName\":\"me.xx2bab.caliper.test.ProxyWrittenInJava_CaliperWrapper\",\"replacedMethodName\":\"getString\"}],\"proxiedFields\":[]}\n" +
-                ")\n" +
-                "public final class ProxyWrittenInJava_CaliperWrapper {\n" +
-                "    public static String getString(String name) {\n" +
-                "        // Caliper.visitMethod(\"android/provider/Settings\$Secure\",\"getString\",name);\n" +
-                "        return me.xx2bab.caliper.test.ProxyWrittenInJava.getString(name);\n" +
-                "    }\n" +
-                "}\n"
+        val expectContent = File("src/test/resources/ProxyWrittenInJavaForMethodProxy_CaliperWrapper.java").readText()
 
         assertThat(
-            targetFile.readText(),
-            equalToCompressingWhiteSpace(targetContent)
+            expectContent,
+            equalToCompressingWhiteSpace(generatedClass)
         )
     }
 
     @Test
     fun `Test Kotlin file generation`() {
         val proxyWrittenInKt = SourceFile.kotlin(
-            "ProxyWrittenInKt.kt", """
+            "ProxyWrittenInKtForMethodProxy.kt", """
         package me.xx2bab.caliper.test;
         import me.xx2bab.caliper.anno.CaliperMethodProxy 
-        object ProxyWrittenInKt {
+        object ProxyWrittenInKtForMethodProxy {
             @CaliperMethodProxy(
                 className = "android/provider/Settings\${'$'}Secure",
                 methodName = "getString",
@@ -89,34 +78,23 @@ class MethodProxyWrapperGenTest {
             sources = listOf(proxyWrittenInKt)
             inheritClassPath = true
             messageOutputStream = System.out // see diagnostics in real time
-            this.symbolProcessorProviders = listOf(CaliperProxyRulesAggregationProcessorProvider())
+            // KSP
             kspWithCompilation = true
+            symbolProcessorProviders = listOf(CaliperProxyRulesAggregationProcessorProvider())
+            kspArgs = mutableMapOf<String, String>(Constants.KSP_OPTION_ANDROID_APP to "true")
         }.compile()
         val kspGenDir = compilationTool.kspSourcesDir
 
-        val targetFile = File(
+        val generatedClass = File(
             kspGenDir,
-            "java/${Constants.CALIPER_PACKAGE_FOR_WRAPPER.replace(".", "/")}/ProxyWrittenInKt_CaliperWrapper.java"
-        )
+            "java/${Constants.CALIPER_PACKAGE_FOR_WRAPPER.replace(".", "/")}/ProxyWrittenInKtForMethodProxy_CaliperWrapper.java"
+        ).readText()
 
-        val targetContent = "package me.xx2bab.caliper.runtime.wrapper;\n" +
-                "\n" +
-                "import java.lang.String;\n" +
-                "import me.xx2bab.caliper.ksp.CaliperMeta;\n" +
-                "\n" +
-                "@CaliperMeta(\n" +
-                "        metadataInJSON = {\"proxiedMethods\":[{\"className\":\"android/provider/Settings\$Secure\",\"methodName\":\"getString\",\"opcode\":184,\"replacedClassName\":\"me.xx2bab.caliper.test.ProxyWrittenInKt_CaliperWrapper\",\"replacedMethodName\":\"getString\"}],\"proxiedFields\":[]}\n" +
-                ")\n" +
-                "public final class ProxyWrittenInKt_CaliperWrapper {\n" +
-                "    public static String getString(String name) {\n" +
-                "        // Caliper.visitMethod(\"android/provider/Settings\$Secure\",\"getString\",name);\n" +
-                "        return me.xx2bab.caliper.test.ProxyWrittenInKt.getString(name);\n" +
-                "    }\n" +
-                "}"
+        val expectContent = File("src/test/resources/ProxyWrittenInKtForMethodProxy_CaliperWrapper.java").readText()
 
         assertThat(
-            targetContent,
-            equalToCompressingWhiteSpace(targetFile.readText())
+            expectContent,
+            equalToCompressingWhiteSpace(generatedClass)
         )
     }
 

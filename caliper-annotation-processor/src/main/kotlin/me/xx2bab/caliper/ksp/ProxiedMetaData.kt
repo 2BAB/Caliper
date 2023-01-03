@@ -1,11 +1,15 @@
-package me.xx2bab.caliper.anno
+package me.xx2bab.caliper.ksp
 
+import com.google.devtools.ksp.symbol.KSFile
+import kotlinx.serialization.Required
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.Transient
 
 @Serializable
 data class ProxiedMetaData(
-    val proxiedMethods: MutableList<ProxiedMethod>,
-    val proxiedFields: MutableList<ProxiedField>,
+    @Required val proxiedMethods: MutableList<ProxiedMethod> = mutableListOf(),
+    @Required val proxiedFields: MutableList<ProxiedField> = mutableListOf(),
+    @Transient val mapKSFiles: MutableList<KSFile> = mutableListOf()
 )
 
 @Serializable

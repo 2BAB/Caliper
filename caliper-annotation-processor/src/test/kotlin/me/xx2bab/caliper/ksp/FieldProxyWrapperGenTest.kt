@@ -2,6 +2,7 @@ package me.xx2bab.caliper.ksp
 
 import com.tschuchort.compiletesting.*
 import me.xx2bab.caliper.anno.ASMOpcodes
+import me.xx2bab.caliper.ksp.Constants.KSP_OPTION_ANDROID_APP
 import org.hamcrest.MatcherAssert.assertThat
 import org.hamcrest.text.IsEqualCompressingWhiteSpace.equalToCompressingWhiteSpace
 import org.junit.jupiter.api.Test
@@ -12,10 +13,10 @@ class FieldProxyWrapperGenTest {
     @Test
     fun `Test Java file generation`() {
         val proxyWrittenInJava = SourceFile.java(
-            "ProxyWrittenInJava.java", """
+            "ProxyWrittenInJavaForFieldProxy.java", """
                 package me.xx2bab.caliper.test;
                 import me.xx2bab.caliper.anno.CaliperFieldProxy;
-                public class ProxyWrittenInJava {            
+                public class ProxyWrittenInJavaForFieldProxy {            
                     @CaliperFieldProxy(
                         className = "android/provider/Settings${'$'}Secure",
                         fieldName = "SERIAL",
@@ -32,44 +33,33 @@ class FieldProxyWrapperGenTest {
             sources = listOf(proxyWrittenInJava)
             inheritClassPath = true
             messageOutputStream = System.out // see diagnostics in real time
-            this.symbolProcessorProviders = listOf(CaliperProxyRulesAggregationProcessorProvider())
+            // KSP
             kspWithCompilation = true
+            symbolProcessorProviders = listOf(CaliperProxyRulesAggregationProcessorProvider())
+            kspArgs = mutableMapOf<String, String>(KSP_OPTION_ANDROID_APP to "true")
         }.compile()
         val kspGenDir = compilationTool.kspSourcesDir
 
-        val targetFile = File(
+        val generatedClass = File(
             kspGenDir,
-            "java/${Constants.CALIPER_PACKAGE_FOR_WRAPPER.replace(".", "/")}/ProxyWrittenInJava_CaliperWrapper.java"
-        )
+            "java/${Constants.CALIPER_PACKAGE_FOR_WRAPPER.replace(".", "/")}/ProxyWrittenInJavaForFieldProxy_CaliperWrapper.java"
+        ).readText()
 
-        val targetContent = "package me.xx2bab.caliper.runtime.wrapper;\n" +
-                "\n" +
-                "import java.lang.String;\n" +
-                "import me.xx2bab.caliper.ksp.CaliperMeta;\n" +
-                "\n" +
-                "@CaliperMeta(\n" +
-                "        metadataInJSON = {\"proxiedMethods\":[],\"proxiedFields\":[{\"className\":\"android/provider/Settings\$Secure\",\"fieldName\":\"SERIAL\",\"opcode\":178,\"replacedClassName\":\"me.xx2bab.caliper.test.ProxyWrittenInJava_CaliperWrapper\",\"replacedMethodName\":\"getString\"}]}\n" +
-                ")\n" +
-                "public final class ProxyWrittenInJava_CaliperWrapper {\n" +
-                "    public static String getString() {\n" +
-                "        // Caliper.visitMethod(\"android/provider/Settings\$Secure\",\"getString\");\n" +
-                "        return me.xx2bab.caliper.test.ProxyWrittenInJava.getString();\n" +
-                "    }\n" +
-                "}\n"
+        val expectContent = File("src/test/resources/ProxyWrittenInJavaForFieldProxy_CaliperWrapper.java").readText()
 
         assertThat(
-            targetFile.readText(),
-            equalToCompressingWhiteSpace(targetContent)
+            expectContent,
+            equalToCompressingWhiteSpace(generatedClass)
         )
     }
 
     @Test
     fun `Test Kotlin file generation`() {
         val proxyWrittenInKt = SourceFile.kotlin(
-            "ProxyWrittenInKt.kt", """
+            "ProxyWrittenInKtForFieldProxy.kt", """
         package me.xx2bab.caliper.test;
         import me.xx2bab.caliper.anno.CaliperFieldProxy 
-        object ProxyWrittenInKt {
+        object ProxyWrittenInKtForFieldProxy {
             @CaliperFieldProxy(
                 className = "android/provider/Settings\${'$'}Secure",
                 fieldName = "SERIAL",
@@ -88,34 +78,23 @@ class FieldProxyWrapperGenTest {
             sources = listOf(proxyWrittenInKt)
             inheritClassPath = true
             messageOutputStream = System.out // see diagnostics in real time
-            this.symbolProcessorProviders = listOf(CaliperProxyRulesAggregationProcessorProvider())
+            // KSP
             kspWithCompilation = true
+            symbolProcessorProviders = listOf(CaliperProxyRulesAggregationProcessorProvider())
+            kspArgs = mutableMapOf<String, String>(KSP_OPTION_ANDROID_APP to "true")
         }.compile()
         val kspGenDir = compilationTool.kspSourcesDir
 
-        val targetFile = File(
+        val generatedClass = File(
             kspGenDir,
-            "java/${Constants.CALIPER_PACKAGE_FOR_WRAPPER.replace(".", "/")}/ProxyWrittenInKt_CaliperWrapper.java"
-        )
+            "java/${Constants.CALIPER_PACKAGE_FOR_WRAPPER.replace(".", "/")}/ProxyWrittenInKtForFieldProxy_CaliperWrapper.java"
+        ).readText()
 
-        val targetContent = "package me.xx2bab.caliper.runtime.wrapper;\n" +
-                "\n" +
-                "import java.lang.String;\n" +
-                "import me.xx2bab.caliper.ksp.CaliperMeta;\n" +
-                "\n" +
-                "@CaliperMeta(\n" +
-                "        metadataInJSON = {\"proxiedMethods\":[],\"proxiedFields\":[{\"className\":\"android/provider/Settings\$Secure\",\"fieldName\":\"SERIAL\",\"opcode\":178,\"replacedClassName\":\"me.xx2bab.caliper.test.ProxyWrittenInKt_CaliperWrapper\",\"replacedMethodName\":\"getString\"}]}\n" +
-                ")\n" +
-                "public final class ProxyWrittenInKt_CaliperWrapper {\n" +
-                "    public static String getString() {\n" +
-                "        // Caliper.visitMethod(\"android/provider/Settings\$Secure\",\"getString\");\n" +
-                "        return me.xx2bab.caliper.test.ProxyWrittenInKt.getString();\n" +
-                "    }\n" +
-                "}\n"
+        val expectContent = File("src/test/resources/ProxyWrittenInKtForFieldProxy_CaliperWrapper.java").readText()
 
         assertThat(
-            targetContent,
-            equalToCompressingWhiteSpace(targetFile.readText())
+            expectContent,
+            equalToCompressingWhiteSpace(generatedClass)
         )
     }
 

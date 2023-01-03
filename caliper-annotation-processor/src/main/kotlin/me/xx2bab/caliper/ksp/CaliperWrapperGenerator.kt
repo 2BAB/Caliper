@@ -9,11 +9,10 @@ import com.squareup.javapoet.ParameterSpec
 import com.squareup.javapoet.TypeSpec
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
+import me.xx2bab.caliper.anno.*
+import org.apache.commons.lang3.StringUtils
+import org.apache.commons.text.StringEscapeUtils
 import kotlin.text.StringBuilder
-import me.xx2bab.caliper.anno.CaliperMethodProxy
-import me.xx2bab.caliper.anno.ProxiedField
-import me.xx2bab.caliper.anno.ProxiedMetaData
-import me.xx2bab.caliper.anno.ProxiedMethod
 import javax.lang.model.element.Modifier
 
 class CaliperWrapperGenerator(
@@ -22,12 +21,12 @@ class CaliperWrapperGenerator(
     private val logger: KSPLoggerWrapper
 ) {
 
-    fun generate() {
+    fun generate(): ProxiedMetaData {
+        val proxiedMetaData = ProxiedMetaData()
         metadataMap.forEach { (className, metadata) ->
-            val wrapperFullClassName = className.toCaliperWrapperName()
             val wrapperSimpleClassName = className.split(".").last().toCaliperWrapperName()
+            val wrapperFullClassName = Constants.CALIPER_PACKAGE_FOR_WRAPPER + "." + wrapperSimpleClassName
 
-            val proxiedMetaData = ProxiedMetaData(mutableListOf(), mutableListOf())
             val methodSpecs = metadata.methods.map { proxyMethod ->
                 val isAnnotatedWithProxyMethod = proxyMethod.targetType == CaliperMethodProxy::class.simpleName
                 if (isAnnotatedWithProxyMethod) {
@@ -59,7 +58,10 @@ class CaliperWrapperGenerator(
                 MethodSpec.methodBuilder(proxyMethod.methodName).returns(proxyMethod.returnType)
                     .addModifiers(Modifier.PUBLIC, Modifier.STATIC).addParameters(inputParams).addStatement(
                         "// Caliper.visitMethod(\""
-                                + proxyMethod.targetClassName.replace("$", "$$") // https://github.com/square/javapoet/issues/670
+                                + proxyMethod.targetClassName.replace(
+                            "$",
+                            "$$"
+                        ) // https://github.com/square/javapoet/issues/670
                                 + "\",\"${proxyMethod.methodName}\"" + "${if (invokeParams.isNullOrBlank()) "" else ","}$invokeParams)"
                     )
                     .addStatement("return $className.${proxyMethod.methodName}($invokeParams)")
@@ -67,7 +69,7 @@ class CaliperWrapperGenerator(
             }
 
             val annotationSpec = AnnotationSpec.builder(CaliperMeta::class.java)
-                .addMember("metadataInJSON", Json.encodeToString(proxiedMetaData).replace("$", "$$"))
+                .addMember("metadataInJSON", "\"${StringEscapeUtils.escapeJava(Json.encodeToString(proxiedMetaData).replace("$", "$$"))}\"")
                 .build()
 
             val classType = TypeSpec.classBuilder(wrapperSimpleClassName).addModifiers(Modifier.PUBLIC, Modifier.FINAL)
@@ -84,7 +86,13 @@ class CaliperWrapperGenerator(
             javaFile.writeTo(sb)
             logger.lifecycle(sb.toString())
             fileOutputStream.write(sb.toString().toByteArray())
+            fileOutputStream.close()
+
+            // TODO: it should link to the wrapper, but we do not find an easy way to resolve it.
+            //   The origin source could work as expect, so we leave it here.
+            proxiedMetaData.mapKSFiles.add(metadata.sourceRef)
         }
+        return proxiedMetaData
     }
 
     private fun String.toCaliperWrapperName() = this + "_CaliperWrapper"

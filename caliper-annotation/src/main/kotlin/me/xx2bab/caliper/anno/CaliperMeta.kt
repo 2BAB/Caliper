@@ -1,4 +1,4 @@
-package me.xx2bab.caliper.ksp
+package me.xx2bab.caliper.anno
 
 @Target(AnnotationTarget.CLASS)
 @Retention(AnnotationRetention.SOURCE)

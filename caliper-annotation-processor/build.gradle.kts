@@ -7,6 +7,7 @@ dependencies {
     implementation(projects.caliperAnnotation)
     implementation(deps.kotlin.std)
     implementation(deps.kotlin.serialization)
+    implementation(deps.apache.common.text)
     implementation(deps.ksp.api)
     implementation(deps.javapoet)
     implementation(deps.kotlinpoet)

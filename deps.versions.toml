@@ -10,8 +10,7 @@ android-gradle-plugin = { module = "com.android.tools.build:gradle", version.ref
 android-gradle-pluginapi = { module = "com.android.tools.build:gradle-api", version.ref = "agpVer" }
 kotlin-std = { module = "org.jetbrains.kotlin:kotlin-stdlib-jdk8", version.ref = "kotlinVer" }
 kotlin-serialization = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version = "1.4.1" }
-polyfill-main = { module = "me.2bab:polyfill", version.ref = "polyfillVer" }
-polyfill-manifest = { module = "me.2bab:polyfill-manifest", version.ref = "polyfillVer" }
+apache-common-text = { module = "org.apache.commons:commons-text", version = "1.10.0"}
 javapoet = { module = "com.squareup:javapoet", version = "1.13.0" }
 kotlinpoet = { module = "com.squareup:kotlinpoet", version.ref = "kotlinpoetVer" }
 kotlinpoet-interop-javapoet = { module = "com.squareup:kotlinpoet-javapoet", version.ref = "kotlinpoetVer" }

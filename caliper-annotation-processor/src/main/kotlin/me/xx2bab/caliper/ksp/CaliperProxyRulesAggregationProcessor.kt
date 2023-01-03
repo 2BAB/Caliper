@@ -3,21 +3,23 @@ package me.xx2bab.caliper.ksp
 import com.google.devtools.ksp.processing.*
 import com.google.devtools.ksp.symbol.*
 import com.google.devtools.ksp.validate
-import com.squareup.javapoet.TypeName
 import com.squareup.kotlinpoet.javapoet.KotlinPoetJavaPoetPreview
 import com.squareup.kotlinpoet.javapoet.toJTypeName
 import com.squareup.kotlinpoet.ksp.toTypeName
-import me.xx2bab.caliper.anno.CaliperClassProxy
-import me.xx2bab.caliper.anno.CaliperFieldProxy
+import me.xx2bab.caliper.anno.*
 import kotlin.collections.getOrPut
-import me.xx2bab.caliper.anno.CaliperMethodProxy
+import me.xx2bab.caliper.ksp.Constants.KSP_OPTION_ANDROID_APP
+import java.util.concurrent.atomic.AtomicBoolean
 
 class CaliperProxyRulesAggregationProcessorProvider : SymbolProcessorProvider {
     override fun create(
         env: SymbolProcessorEnvironment
     ): SymbolProcessor {
+        val logger = KSPLoggerWrapper(env.logger)
+        val isAndroidAppModule = env.options[KSP_OPTION_ANDROID_APP].toBoolean()
+        logger.lifecycle("isAndroidAppModule: $isAndroidAppModule")
         return CaliperProxyRulesAggregationProcessor(
-            env.codeGenerator, KSPLoggerWrapper(env.logger)
+            isAndroidAppModule, env.codeGenerator, logger
         )
     }
 }
@@ -26,11 +28,18 @@ class CaliperProxyRulesAggregationProcessorProvider : SymbolProcessorProvider {
  * The processor to aggregate all [@ProxyMethod] [@ProxyField] from [caliper-runtime] module.
  */
 class CaliperProxyRulesAggregationProcessor(
-    val codeGenerator: CodeGenerator,
-    val logger: KSPLoggerWrapper,
+    private val isAndroidAppModule: Boolean,
+    private val codeGenerator: CodeGenerator,
+    private val logger: KSPLoggerWrapper,
 ) : SymbolProcessor {
 
+    // For per module
     private val metadataMap: MutableMap<String, ProxyMetaData> = mutableMapOf()
+
+    // For app module only
+    private val subMetaDataCollected = AtomicBoolean(false)
+    private val aggregatedMetadata = ProxiedMetaData()
+    private lateinit var aggregator: CaliperAggregator
 
     companion object {
         const val ERROR_ILLEGAL_CLASS_STRUCTURE = "The annotated element is not wrapped by a class."
@@ -42,13 +51,23 @@ class CaliperProxyRulesAggregationProcessor(
     override fun process(resolver: Resolver): List<KSAnnotated> {
         logger.lifecycle("process")
 
+        // Load metadata from subprojects, put all of them into the `exportMetadata` of main project,
         val symbols = resolver.getSymbolsWithAnnotation(CaliperMethodProxy::class.qualifiedName!!)
             .plus(resolver.getSymbolsWithAnnotation(CaliperFieldProxy::class.qualifiedName!!))
         logger.lifecycle("Method + Field symbols: ${symbols.toList().size}")
 
-        val ret = symbols.filter { !it.validate() }.toList()
+        // val ret = symbols.filter { !it.validate() }.toList()
         symbols.filter { it is KSFunctionDeclaration && it.validate() }.forEach { it.accept(MetaCollector(), Unit) }
-        return ret
+
+        if (!subMetaDataCollected.get()) {
+            subMetaDataCollected.set(true)
+            aggregator = CaliperAggregator(logger)
+            aggregator.collect(aggregatedMetadata, resolver)
+        }
+
+        // To simplify the workflow, we only support one round processing,
+        // since all proxy class are designated to be fixed (resolved elements).
+        return emptyList()
     }
 
     override fun finish() {
@@ -56,7 +75,13 @@ class CaliperProxyRulesAggregationProcessor(
         logger.lifecycle("finish")
         logger.lifecycle("metadataMap size: ${metadataMap.size}")
         val generator = CaliperWrapperGenerator(metadataMap, codeGenerator, logger)
-        generator.generate()
+        val currProxiedMetadata = generator.generate()
+        if (isAndroidAppModule) {
+            aggregatedMetadata.proxiedMethods.addAll(currProxiedMetadata.proxiedMethods)
+            aggregatedMetadata.proxiedFields.addAll(currProxiedMetadata.proxiedFields)
+            aggregatedMetadata.mapKSFiles.addAll(currProxiedMetadata.mapKSFiles)
+            aggregator.generate(aggregatedMetadata, codeGenerator)
+        }
     }
 
     @OptIn(KotlinPoetJavaPoetPreview::class)
@@ -157,6 +182,5 @@ class CaliperProxyRulesAggregationProcessor(
     private fun KSAnnotation.getParamValueByKey(key: String) = arguments
         .first { it.name != null && it.name!!.asString() == key }
         .value!!
-
 
 }
