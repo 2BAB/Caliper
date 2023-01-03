@@ -9,6 +9,7 @@ import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import me.xx2bab.caliper.anno.CaliperMeta
+import me.xx2bab.caliper.common.Constants
 
 class CaliperAggregator(
     private val logger: KSPLoggerWrapper
@@ -16,7 +17,7 @@ class CaliperAggregator(
     @OptIn(KspExperimental::class)
     fun collect(aggregatedMetadata: ProxiedMetaData, resolver: Resolver) {
         logger.info("Query all sub projects meta data")
-        resolver.getDeclarationsFromPackage(Constants.CALIPER_PACKAGE_FOR_WRAPPER)
+        resolver.getDeclarationsFromPackage(Constants.CALIPER_PACKAGE_FOR_WRAPPER_SPLIT_BY_SLASH)
             .filter {
                 it is KSClassDeclaration
                         && it.annotations.any { anno -> anno.shortName.asString() == CaliperMeta::class.simpleName }

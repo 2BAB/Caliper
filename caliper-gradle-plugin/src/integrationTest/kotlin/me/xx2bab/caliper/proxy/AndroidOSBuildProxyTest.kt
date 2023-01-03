@@ -3,8 +3,9 @@ package me.xx2bab.caliper.proxy
 import com.tschuchort.compiletesting.KotlinCompilation
 import com.tschuchort.compiletesting.KotlinCompilation.Result
 import com.tschuchort.compiletesting.SourceFile
+import me.xx2bab.caliper.anno.ASMOpcodes
+import me.xx2bab.caliper.common.ProxiedField
 import me.xx2bab.caliper.core.CaliperASMManipulator
-import me.xx2bab.caliper.core.FieldProxy
 import me.xx2bab.caliper.core.ProxyConfig
 import me.xx2bab.caliper.tool.checkByteCodeIntegrity
 import me.xx2bab.caliper.tool.invokeMethod
@@ -12,7 +13,6 @@ import org.hamcrest.MatcherAssert
 import org.hamcrest.Matchers.`is`
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
-import org.objectweb.asm.Opcodes
 
 class AndroidOSBuildProxyTest {
 
@@ -40,8 +40,10 @@ class AndroidOSBuildProxyTest {
                 "Caliper.java", """
                 package me.xx2bab.caliper.runtime;
     
-                public class Caliper {                                
-                      public static final String SERIAL = "$MOCK_SERIAL_ID";  
+                public class Caliper {                                                    
+                    public static String getSerial() {
+                        return "$MOCK_SERIAL_ID";
+                    }
                 }
             """.trimIndent()
             )
@@ -81,12 +83,14 @@ class AndroidOSBuildProxyTest {
         val asmManipulator = CaliperASMManipulator(
             inputClassFile = compiledTestClassFile,
             config = ProxyConfig(
-                methodProxyList = listOf(),
-                fieldProxyList = listOf(
-                    FieldProxy(
-                        opcode = Opcodes.GETSTATIC,
+                proxiedMethods = mutableListOf(),
+                proxiedFields = mutableListOf(
+                    ProxiedField(
                         className = "android/os/Build",
-                        fieldName = "SERIAL"
+                        fieldName = "SERIAL",
+                        opcode = ASMOpcodes.GETSTATIC,
+                        replacedClassName = "me/xx2bab/caliper/runtime/Caliper",
+                        replacedMethodName = "getSerial"
                     )
                 )
             ),

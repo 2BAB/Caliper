@@ -8,7 +8,7 @@ import com.squareup.kotlinpoet.javapoet.toJTypeName
 import com.squareup.kotlinpoet.ksp.toTypeName
 import me.xx2bab.caliper.anno.*
 import kotlin.collections.getOrPut
-import me.xx2bab.caliper.ksp.Constants.KSP_OPTION_ANDROID_APP
+import me.xx2bab.caliper.common.Constants.KSP_OPTION_ANDROID_APP
 import java.util.concurrent.atomic.AtomicBoolean
 
 class CaliperProxyRulesAggregationProcessorProvider : SymbolProcessorProvider {

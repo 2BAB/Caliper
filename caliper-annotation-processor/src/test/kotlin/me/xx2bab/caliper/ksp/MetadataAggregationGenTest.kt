@@ -1,7 +1,7 @@
 package me.xx2bab.caliper.ksp
 
 import com.tschuchort.compiletesting.*
-import me.xx2bab.caliper.anno.ASMOpcodes
+import me.xx2bab.caliper.common.Constants
 import org.hamcrest.MatcherAssert.assertThat
 import org.hamcrest.text.IsEqualCompressingWhiteSpace.equalToCompressingWhiteSpace
 import org.junit.jupiter.api.Test

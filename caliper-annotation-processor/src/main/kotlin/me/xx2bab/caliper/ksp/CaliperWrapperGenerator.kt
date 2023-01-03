@@ -10,7 +10,7 @@ import com.squareup.javapoet.TypeSpec
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import me.xx2bab.caliper.anno.*
-import org.apache.commons.lang3.StringUtils
+import me.xx2bab.caliper.common.Constants
 import org.apache.commons.text.StringEscapeUtils
 import kotlin.text.StringBuilder
 import javax.lang.model.element.Modifier
@@ -25,7 +25,7 @@ class CaliperWrapperGenerator(
         val proxiedMetaData = ProxiedMetaData()
         metadataMap.forEach { (className, metadata) ->
             val wrapperSimpleClassName = className.split(".").last().toCaliperWrapperName()
-            val wrapperFullClassName = Constants.CALIPER_PACKAGE_FOR_WRAPPER + "." + wrapperSimpleClassName
+            val wrapperFullClassName = Constants.CALIPER_PACKAGE_FOR_WRAPPER_SPLIT_BY_SLASH + "." + wrapperSimpleClassName
 
             val methodSpecs = metadata.methods.map { proxyMethod ->
                 val isAnnotatedWithProxyMethod = proxyMethod.targetType == CaliperMethodProxy::class.simpleName
@@ -74,11 +74,11 @@ class CaliperWrapperGenerator(
 
             val classType = TypeSpec.classBuilder(wrapperSimpleClassName).addModifiers(Modifier.PUBLIC, Modifier.FINAL)
                 .addAnnotation(annotationSpec).addMethods(methodSpecs).build()
-            val javaFile = JavaFile.builder(Constants.CALIPER_PACKAGE_FOR_WRAPPER, classType).indent("    ").build()
+            val javaFile = JavaFile.builder(Constants.CALIPER_PACKAGE_FOR_WRAPPER_SPLIT_BY_SLASH, classType).indent("    ").build()
 
             val fileOutputStream = codeGenerator.createNewFile(
                 dependencies = Dependencies(false, metadata.sourceRef),
-                packageName = Constants.CALIPER_PACKAGE_FOR_WRAPPER,
+                packageName = Constants.CALIPER_PACKAGE_FOR_WRAPPER_SPLIT_BY_SLASH,
                 fileName = wrapperSimpleClassName,
                 extensionName = "java"
             )

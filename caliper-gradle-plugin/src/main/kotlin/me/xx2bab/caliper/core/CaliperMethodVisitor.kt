@@ -1,5 +1,7 @@
 package me.xx2bab.caliper.core
 
+import me.xx2bab.caliper.anno.ASMOpcodes
+import me.xx2bab.caliper.common.Constants.CALIPER_PACKAGE_FOR_WRAPPER_SPLIT_BY_SLASH
 import org.objectweb.asm.MethodVisitor
 import org.objectweb.asm.commons.AdviceAdapter
 
@@ -26,25 +28,26 @@ class CaliperMethodVisitor(
             "[CaliperMethodVisitor] visitFieldInsn class = $className , opcode = $opcode, owner = $owner," +
                     " name = $name, descriptor = $descriptor"
         )
-        val fieldProxies = proxyConfig.fieldProxyList
+        val fieldProxies = proxyConfig.proxiedFields
         for (fp in fieldProxies) {
             if (opcode == fp.opcode
                 && owner == fp.className
                 && name == fp.fieldName
                 && descriptor != null // All sensitive data should have at least an output of the API call.
-                && className != "me/xx2bab/caliper/runtime/Caliper"
+                && className.contains(CALIPER_PACKAGE_FOR_WRAPPER_SPLIT_BY_SLASH).not()
             ) {
-                logger.info("[CaliperMethodVisitor] visitFieldInsn matched")
-                // val desc = StringBuilder().append(descriptor.substring(0, 1))
-                //     .append("Landroid/provider/Settings\$Secure;")
-                //     .append(descriptor.substring(1, descriptor.length))
-                //     .toString()
-                visitFieldInsn(
-                    opcode,
-                    "me/xx2bab/caliper/runtime/Caliper",
-                    name,
-                    descriptor
-                )
+                logger.info("[CaliperMethodVisitor] visitFieldInsn matched.")
+                if (opcode == ASMOpcodes.GETSTATIC) {
+                    visitMethodInsn(
+                        opcode = INVOKESTATIC,
+                        owner = fp.replacedClassName,
+                        methodName = fp.replacedMethodName,
+                        descriptor = "()" + descriptor,
+                        isInterface = false
+                    )
+                } else if (opcode == ASMOpcodes.GETFIELD) {
+
+                }
                 return
             }
         }
@@ -64,22 +67,36 @@ class CaliperMethodVisitor(
                     " methodName = $methodName, descriptor = $descriptor"
         )
 
-        val methodProxies = proxyConfig.methodProxyList
+        val methodProxies = proxyConfig.proxiedMethods
         for (mp in methodProxies) {
             if (opcode == mp.opcode
                 && owner == mp.className
                 && methodName == mp.methodName
                 && descriptor != null // All sensitive data should have at least the output of an API call.
-                && className != "me/xx2bab/caliper/runtime/Caliper"
+                && className.contains(CALIPER_PACKAGE_FOR_WRAPPER_SPLIT_BY_SLASH).not()
             ) {
-                // val desc = StringBuilder().append(descriptor.substring(0, 1))
-                //     .append("Landroid/provider/Settings\$Secure;")
-                //     .append(descriptor.substring(1, descriptor.length))
-                //     .toString()
-                visitMethodInsn(
-                    INVOKESTATIC, "me/xx2bab/caliper/runtime/Caliper",
-                    methodName, descriptor, false
-                )
+                logger.info("[CaliperMethodVisitor] visitMethodInsn matched.")
+                if (opcode == ASMOpcodes.INVOKESTATIC) {
+                    visitMethodInsn(
+                        opcode = INVOKESTATIC,
+                        owner = mp.replacedClassName,
+                        methodName = mp.replacedMethodName,
+                        descriptor = descriptor,
+                        isInterface = false
+                    )
+                } else if (opcode == ASMOpcodes.INVOKEVIRTUAL) {
+                    // val desc = StringBuilder().append(descriptor.substring(0, 1))
+                    //     .append("Landroid/provider/Settings\$Secure;")
+                    //     .append(descriptor.substring(1, descriptor.length))
+                    //     .toString()
+                    visitMethodInsn(
+                        opcode = INVOKESTATIC,
+                        owner = mp.replacedClassName,
+                        methodName = mp.replacedMethodName,
+                        descriptor = descriptor,
+                        isInterface = false
+                    )
+                }
                 return
             }
         }

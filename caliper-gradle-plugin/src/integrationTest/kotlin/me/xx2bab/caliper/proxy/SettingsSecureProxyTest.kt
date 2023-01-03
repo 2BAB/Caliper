@@ -4,8 +4,9 @@ import com.tschuchort.compiletesting.KotlinCompilation
 import com.tschuchort.compiletesting.KotlinCompilation.Result
 import com.tschuchort.compiletesting.KotlinCompilation.ExitCode
 import com.tschuchort.compiletesting.SourceFile
+import me.xx2bab.caliper.anno.ASMOpcodes
+import me.xx2bab.caliper.common.ProxiedMethod
 import me.xx2bab.caliper.core.CaliperASMManipulator
-import me.xx2bab.caliper.core.MethodProxy
 import me.xx2bab.caliper.core.ProxyConfig
 import me.xx2bab.caliper.tool.checkByteCodeIntegrity
 import me.xx2bab.caliper.tool.getFieldValueInString
@@ -15,7 +16,6 @@ import org.hamcrest.MatcherAssert.assertThat
 import org.hamcrest.Matchers.`is`
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
-import org.objectweb.asm.Opcodes.INVOKESTATIC
 
 class SettingsSecureProxyTest {
 
@@ -103,14 +103,15 @@ class SettingsSecureProxyTest {
         val asmManipulator = CaliperASMManipulator(
             inputClassFile = compiledTestClassFile,
             config = ProxyConfig(
-                methodProxyList = listOf(
-                    MethodProxy(
-                        opcode = INVOKESTATIC,
+                proxiedMethods = mutableListOf(
+                    ProxiedMethod(
                         className = "android/provider/Settings\$Secure",
-                        methodName = "getString"
+                        methodName = "getString",
+                        opcode = ASMOpcodes.INVOKESTATIC,
+                        replacedClassName = "me/xx2bab/caliper/runtime/Caliper",
+                        replacedMethodName = "getString"
                     )
-                ),
-                fieldProxyList = listOf()
+                )
             ),
         )
         asmManipulator.processInPlace()

@@ -2,7 +2,8 @@ package me.xx2bab.caliper.ksp
 
 import com.tschuchort.compiletesting.*
 import me.xx2bab.caliper.anno.ASMOpcodes
-import me.xx2bab.caliper.ksp.Constants.KSP_OPTION_ANDROID_APP
+import me.xx2bab.caliper.common.Constants
+import me.xx2bab.caliper.common.Constants.KSP_OPTION_ANDROID_APP
 import org.hamcrest.MatcherAssert.assertThat
 import org.hamcrest.text.IsEqualCompressingWhiteSpace.equalToCompressingWhiteSpace
 import org.junit.jupiter.api.Test
@@ -42,7 +43,7 @@ class FieldProxyWrapperGenTest {
 
         val generatedClass = File(
             kspGenDir,
-            "java/${Constants.CALIPER_PACKAGE_FOR_WRAPPER.replace(".", "/")}/ProxyWrittenInJavaForFieldProxy_CaliperWrapper.java"
+            "java/${Constants.CALIPER_PACKAGE_FOR_WRAPPER_SPLIT_BY_SLASH.replace(".", "/")}/ProxyWrittenInJavaForFieldProxy_CaliperWrapper.java"
         ).readText()
 
         val expectContent = File("src/test/resources/ProxyWrittenInJavaForFieldProxy_CaliperWrapper.java").readText()
@@ -87,7 +88,7 @@ class FieldProxyWrapperGenTest {
 
         val generatedClass = File(
             kspGenDir,
-            "java/${Constants.CALIPER_PACKAGE_FOR_WRAPPER.replace(".", "/")}/ProxyWrittenInKtForFieldProxy_CaliperWrapper.java"
+            "java/${Constants.CALIPER_PACKAGE_FOR_WRAPPER_SPLIT_BY_SLASH.replace(".", "/")}/ProxyWrittenInKtForFieldProxy_CaliperWrapper.java"
         ).readText()
 
         val expectContent = File("src/test/resources/ProxyWrittenInKtForFieldProxy_CaliperWrapper.java").readText()
