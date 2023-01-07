@@ -42,11 +42,18 @@ class CaliperMethodVisitor(
                         opcode = INVOKESTATIC,
                         owner = fp.replacedClassName,
                         methodName = fp.replacedMethodName,
-                        descriptor = "()" + descriptor,
+                        descriptor = "()$descriptor",
                         isInterface = false
                     )
                 } else if (opcode == ASMOpcodes.GETFIELD) {
-
+                    val newMethodDescWithOriginCallerClass = "(L${fp.className};)" + descriptor
+                    visitMethodInsn(
+                        opcode = INVOKESTATIC,
+                        owner = fp.replacedClassName,
+                        methodName = fp.replacedMethodName,
+                        descriptor = newMethodDescWithOriginCallerClass,
+                        isInterface = false
+                    )
                 }
                 return
             }
@@ -84,16 +91,16 @@ class CaliperMethodVisitor(
                         descriptor = descriptor,
                         isInterface = false
                     )
-                } else if (opcode == ASMOpcodes.INVOKEVIRTUAL) {
-                    // val desc = StringBuilder().append(descriptor.substring(0, 1))
-                    //     .append("Landroid/provider/Settings\$Secure;")
-                    //     .append(descriptor.substring(1, descriptor.length))
-                    //     .toString()
+                } else if (opcode == ASMOpcodes.INVOKEVIRTUAL) { // TODO: may have more opcodes
+                     val newMethodDescWithOriginCallerClass = StringBuilder().append(descriptor.substring(0, 1))
+                         .append("L${mp.className};")
+                         .append(descriptor.substring(1, descriptor.length))
+                         .toString()
                     visitMethodInsn(
                         opcode = INVOKESTATIC,
                         owner = mp.replacedClassName,
                         methodName = mp.replacedMethodName,
-                        descriptor = descriptor,
+                        descriptor = newMethodDescWithOriginCallerClass,
                         isInterface = false
                     )
                 }
