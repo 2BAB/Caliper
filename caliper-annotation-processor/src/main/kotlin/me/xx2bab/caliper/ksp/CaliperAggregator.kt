@@ -17,7 +17,7 @@ class CaliperAggregator(
     @OptIn(KspExperimental::class)
     fun collect(aggregatedMetadata: ProxiedMetaData, resolver: Resolver) {
         logger.info("Query all sub projects meta data")
-        resolver.getDeclarationsFromPackage(Constants.CALIPER_PACKAGE_FOR_WRAPPER_SPLIT_BY_SLASH)
+        resolver.getDeclarationsFromPackage(Constants.CALIPER_PACKAGE_FOR_WRAPPER)
             .filter {
                 it is KSClassDeclaration
                         && it.annotations.any { anno -> anno.shortName.asString() == CaliperMeta::class.simpleName }

@@ -4,7 +4,7 @@ import java.lang.String;
 import me.xx2bab.caliper.anno.CaliperMeta;
 
 @CaliperMeta(
-        metadataInJSON = "{\"proxiedMethods\":[],\"proxiedFields\":[{\"className\":\"android/provider/Settings$Secure\",\"fieldName\":\"SERIAL\",\"opcode\":178,\"replacedClassName\":\"me.xx2bab.caliper.runtime.wrapper.ProxyWrittenInJavaForFieldProxy_CaliperWrapper\",\"replacedMethodName\":\"getString\"}]}"
+        metadataInJSON = "{\"proxiedMethods\":[],\"proxiedFields\":[{\"className\":\"android/provider/Settings$Secure\",\"fieldName\":\"SERIAL\",\"opcode\":178,\"replacedClassName\":\"me/xx2bab/caliper/runtime/wrapper/ProxyWrittenInJavaForFieldProxy_CaliperWrapper\",\"replacedMethodName\":\"getString\"}]}"
 )
 public final class ProxyWrittenInJavaForFieldProxy_CaliperWrapper {
     public static String getString() {

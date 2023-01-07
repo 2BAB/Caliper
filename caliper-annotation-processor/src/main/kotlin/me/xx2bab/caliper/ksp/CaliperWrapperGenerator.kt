@@ -11,6 +11,8 @@ import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import me.xx2bab.caliper.anno.*
 import me.xx2bab.caliper.common.Constants
+import me.xx2bab.caliper.common.ProxiedField
+import me.xx2bab.caliper.common.ProxiedMethod
 import org.apache.commons.text.StringEscapeUtils
 import kotlin.text.StringBuilder
 import javax.lang.model.element.Modifier
@@ -25,7 +27,7 @@ class CaliperWrapperGenerator(
         val proxiedMetaData = ProxiedMetaData()
         metadataMap.forEach { (className, metadata) ->
             val wrapperSimpleClassName = className.split(".").last().toCaliperWrapperName()
-            val wrapperFullClassName = Constants.CALIPER_PACKAGE_FOR_WRAPPER_SPLIT_BY_SLASH + "." + wrapperSimpleClassName
+            val wrapperFullClassNameBySlash = Constants.CALIPER_PACKAGE_FOR_WRAPPER_SPLIT_BY_SLASH + "/" + wrapperSimpleClassName
 
             val methodSpecs = metadata.methods.map { proxyMethod ->
                 val isAnnotatedWithProxyMethod = proxyMethod.targetType == CaliperMethodProxy::class.simpleName
@@ -34,7 +36,7 @@ class CaliperWrapperGenerator(
                         className = proxyMethod.targetClassName,
                         methodName = proxyMethod.targetElementName,
                         opcode = proxyMethod.targetOpcode,
-                        replacedClassName = wrapperFullClassName,
+                        replacedClassName = wrapperFullClassNameBySlash,
                         replacedMethodName = proxyMethod.methodName
                     )
                     proxiedMetaData.proxiedMethods.add(pm)
@@ -43,7 +45,7 @@ class CaliperWrapperGenerator(
                         className = proxyMethod.targetClassName,
                         fieldName = proxyMethod.targetElementName,
                         opcode = proxyMethod.targetOpcode,
-                        replacedClassName = wrapperFullClassName,
+                        replacedClassName = wrapperFullClassNameBySlash,
                         replacedMethodName = proxyMethod.methodName
                     )
                     proxiedMetaData.proxiedFields.add(pf)
@@ -74,11 +76,11 @@ class CaliperWrapperGenerator(
 
             val classType = TypeSpec.classBuilder(wrapperSimpleClassName).addModifiers(Modifier.PUBLIC, Modifier.FINAL)
                 .addAnnotation(annotationSpec).addMethods(methodSpecs).build()
-            val javaFile = JavaFile.builder(Constants.CALIPER_PACKAGE_FOR_WRAPPER_SPLIT_BY_SLASH, classType).indent("    ").build()
+            val javaFile = JavaFile.builder(Constants.CALIPER_PACKAGE_FOR_WRAPPER, classType).indent("    ").build()
 
             val fileOutputStream = codeGenerator.createNewFile(
                 dependencies = Dependencies(false, metadata.sourceRef),
-                packageName = Constants.CALIPER_PACKAGE_FOR_WRAPPER_SPLIT_BY_SLASH,
+                packageName = Constants.CALIPER_PACKAGE_FOR_WRAPPER,
                 fileName = wrapperSimpleClassName,
                 extensionName = "java"
             )
