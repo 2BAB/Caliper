@@ -107,17 +107,10 @@ class CaliperProxyRulesAggregationProcessor(
                 return
             }
 
-            val validAnno = if (methodProxyAnnotation != null) {
-                methodProxyAnnotation!!
-            } else {
-                fieldProxyAnnotation!!
-            }
+            val validAnno = methodProxyAnnotation ?: fieldProxyAnnotation!!
             val targetClassName = validAnno.getParamValueByKey("className").toString()
-            val targetElementName = if (methodProxyAnnotation != null) {
-                methodProxyAnnotation!!.getParamValueByKey("methodName").toString()
-            } else {
-                fieldProxyAnnotation!!.getParamValueByKey("fieldName").toString()
-            }
+            val targetElementName = methodProxyAnnotation?.getParamValueByKey("methodName")?.toString()
+                ?: fieldProxyAnnotation!!.getParamValueByKey("fieldName").toString()
             val targetOpcode = validAnno.getParamValueByKey("opcode") as Int
 
             if ((function.parentDeclaration is KSClassDeclaration).not()) {
@@ -152,7 +145,7 @@ class CaliperProxyRulesAggregationProcessor(
                     )
                 } else {
                     logger.error(
-                        "Can not parse the element's name of the type " + "${it.type.toTypeName().toString()}"
+                        "Can not parse the element's name of the type " + it.type.toTypeName().toString()
                     )
                 }
             }

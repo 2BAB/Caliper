@@ -64,7 +64,7 @@ class CaliperWrapperGenerator(
                             "$",
                             "$$"
                         ) // https://github.com/square/javapoet/issues/670
-                                + "\",\"${proxyMethod.methodName}\"" + "${if (invokeParams.isNullOrBlank()) "" else ","}$invokeParams)"
+                                + "\",\"${proxyMethod.methodName}\"" + "${if (invokeParams.isBlank()) "" else ","}$invokeParams)"
                     )
                     .addStatement("return $className.${proxyMethod.methodName}($invokeParams)")
                     .build()

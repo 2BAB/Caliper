@@ -22,10 +22,10 @@ class CaliperAggregator(
                 it is KSClassDeclaration
                         && it.annotations.any { anno -> anno.shortName.asString() == CaliperMeta::class.simpleName }
             }
-            .forEach {
-                logger.info("Aggregate from ${it.qualifiedName?.asString()}")
-                it.containingFile?.let { aggregatedMetadata.mapKSFiles.add(it) }
-                val meta = it.annotations.first { anno ->
+            .forEach { ksDeclaration ->
+                logger.info("Aggregate from ${ksDeclaration.qualifiedName?.asString()}")
+                ksDeclaration.containingFile?.let { aggregatedMetadata.mapKSFiles.add(it) }
+                val meta = ksDeclaration.annotations.first { anno ->
                     anno.shortName.asString() == CaliperMeta::class.simpleName
                 }
                 val subMetaData = Json.decodeFromString<ProxiedMetaData>(
