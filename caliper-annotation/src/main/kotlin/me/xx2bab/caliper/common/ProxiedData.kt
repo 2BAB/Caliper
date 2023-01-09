@@ -19,3 +19,9 @@ data class ProxiedField(
     val replacedClassName: String,
     val replacedMethodName: String
 )
+
+@Serializable
+data class ProxiedClass(
+    val className: String,
+    val replacedClassName: String
+)

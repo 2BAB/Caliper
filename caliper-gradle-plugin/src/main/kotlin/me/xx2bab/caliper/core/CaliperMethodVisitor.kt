@@ -16,12 +16,30 @@ class CaliperMethodVisitor(
     private val logger: KLogger = DefaultKotlinLogger()
 ) : AdviceAdapter(ASM9, superVisitor, access, methodName, descriptor) {
 
-    override fun visitInsn(opcode: Int) {
-        super.visitInsn(opcode)
+//    override fun visitInsn(opcode: Int) {
+//        super.visitInsn(opcode)
+//        logger.info(
+//            "[CaliperMethodVisitor] visitInsn class = $className , opcode = $opcode"
+//        )
+//    }
+
+    private var isNewOperationCodeFound = false
+
+    override fun visitTypeInsn(opcode: Int, type: String?) {
         logger.info(
-            "[CaliperMethodVisitor] visitInsn class = $className , opcode = $opcode"
+            "[CaliperMethodVisitor] visitTypeInsn class = $className , opcode = $opcode,"
         )
+        val classProxies = proxyConfig.proxiedClasses
+        for (cp in classProxies) {
+            if (opcode == NEW && type == cp.className) {
+                isNewOperationCodeFound = true
+                superVisitor.visitTypeInsn(NEW, cp.replacedClassName)
+                return
+            }
+        }
+        super.visitTypeInsn(opcode, type)
     }
+
 
     override fun visitFieldInsn(opcode: Int, owner: String?, name: String?, descriptor: String?) {
         logger.info(
@@ -74,6 +92,27 @@ class CaliperMethodVisitor(
                     " methodName = $methodName, descriptor = $descriptor"
         )
 
+        // To match a pair of the `new` keyword and the `init()` method.
+        if (isNewOperationCodeFound) {
+            val classProxies = proxyConfig.proxiedClasses
+            for (cp in classProxies) {
+                if (opcode == INVOKESPECIAL
+                    && owner == cp.className
+                    && className != cp.replacedClassName
+                ) {
+                    isNewOperationCodeFound = false
+                    superVisitor.visitMethodInsn(
+                        INVOKESPECIAL,
+                        cp.replacedClassName,
+                        methodName,
+                        descriptor,
+                        isInterface
+                    )
+                    return
+                }
+            }
+        }
+
         val methodProxies = proxyConfig.proxiedMethods
         for (mp in methodProxies) {
             if (opcode == mp.opcode
@@ -92,10 +131,10 @@ class CaliperMethodVisitor(
                         isInterface = false
                     )
                 } else if (opcode == ASMOpcodes.INVOKEVIRTUAL) { // TODO: may have more opcodes
-                     val newMethodDescWithOriginCallerClass = StringBuilder().append(descriptor.substring(0, 1))
-                         .append("L${mp.className};")
-                         .append(descriptor.substring(1, descriptor.length))
-                         .toString()
+                    val newMethodDescWithOriginCallerClass = StringBuilder().append(descriptor.substring(0, 1))
+                        .append("L${mp.className};")
+                        .append(descriptor.substring(1, descriptor.length))
+                        .toString()
                     visitMethodInsn(
                         opcode = INVOKESTATIC,
                         owner = mp.replacedClassName,
