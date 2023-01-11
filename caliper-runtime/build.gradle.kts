@@ -25,4 +25,5 @@ android {
 dependencies {
     implementation(projects.caliperAnnotation)
     compileOnly(deps.asm.core)
+    testImplementation(deps.junit5)
 }
