@@ -42,6 +42,7 @@ class CaliperProxyRulesAggregationProcessor(
     private lateinit var aggregator: CaliperAggregator
 
     companion object {
+        const val ERROR_ILLEGAL_CLASS_NAME = "The annotated class is not valid with qualified name."
         const val ERROR_ILLEGAL_CLASS_STRUCTURE = "The annotated element is not wrapped by a class."
         const val ERROR_MULTI_CALIPER_ANNOTATIONS =
             "More than one Caliper annotation is found on the current element %s."
@@ -52,12 +53,15 @@ class CaliperProxyRulesAggregationProcessor(
         logger.lifecycle("process")
 
         // Load metadata from subprojects, put all of them into the `exportMetadata` of main project,
-        val symbols = resolver.getSymbolsWithAnnotation(CaliperMethodProxy::class.qualifiedName!!)
+        val methodAndFieldSymbols = resolver.getSymbolsWithAnnotation(CaliperMethodProxy::class.qualifiedName!!)
             .plus(resolver.getSymbolsWithAnnotation(CaliperFieldProxy::class.qualifiedName!!))
-        logger.lifecycle("Method + Field symbols: ${symbols.toList().size}")
+        logger.lifecycle("Method + Field symbols: ${methodAndFieldSymbols.toList().size}")
+        methodAndFieldSymbols.filter { it is KSFunctionDeclaration && it.validate() }
+            .forEach { it.accept(MetaCollectorForMethodAndFieldProxy(), Unit) }
 
-        // val ret = symbols.filter { !it.validate() }.toList()
-        symbols.filter { it is KSFunctionDeclaration && it.validate() }.forEach { it.accept(MetaCollector(), Unit) }
+        val classSymbols = resolver.getSymbolsWithAnnotation(CaliperClassProxy::class.qualifiedName!!)
+        classSymbols.filter { it is KSClassDeclaration && it.validate() }
+            .forEach { it.accept(MetaCollectorForClass(), Unit) }
 
         if (!subMetaDataCollected.get()) {
             subMetaDataCollected.set(true)
@@ -77,6 +81,7 @@ class CaliperProxyRulesAggregationProcessor(
         val generator = CaliperWrapperGenerator(metadataMap, codeGenerator, logger)
         val currProxiedMetadata = generator.generate()
         if (isAndroidAppModule) {
+            aggregatedMetadata.proxiedClasses.addAll(currProxiedMetadata.proxiedClasses)
             aggregatedMetadata.proxiedMethods.addAll(currProxiedMetadata.proxiedMethods)
             aggregatedMetadata.proxiedFields.addAll(currProxiedMetadata.proxiedFields)
             aggregatedMetadata.mapKSFiles.addAll(currProxiedMetadata.mapKSFiles)
@@ -85,7 +90,34 @@ class CaliperProxyRulesAggregationProcessor(
     }
 
     @OptIn(KotlinPoetJavaPoetPreview::class)
-    inner class MetaCollector : KSVisitorVoid() {
+    inner class MetaCollectorForClass : KSVisitorVoid() {
+
+        override fun visitClassDeclaration(classDeclaration: KSClassDeclaration, data: Unit) {
+            super.visitClassDeclaration(classDeclaration, data)
+            logger.info("visitClassDeclaration")
+
+            if (classDeclaration.qualifiedName == null) {
+                logger.error(ERROR_ILLEGAL_CLASS_NAME)
+                return
+            }
+            val validClassName = classDeclaration.qualifiedName!!.asString()
+            val classProxyAnnotation =
+                classDeclaration.annotations.first { it.shortName.asString() == CaliperClassProxy::class.simpleName }
+            val targetClassName = classProxyAnnotation.getParamValueByKey("className").toString()
+            metadataMap.getOrPut(validClassName) {
+                ProxyMetaData(
+                    classTypeName = classDeclaration.asStarProjectedType().toTypeName().toJTypeName(),
+                    sourceRef = classDeclaration.containingFile!!,
+                    methods = mutableListOf(),
+                    targetClass = targetClassName
+                )
+            }
+        }
+
+    }
+
+    @OptIn(KotlinPoetJavaPoetPreview::class)
+    inner class MetaCollectorForMethodAndFieldProxy : KSVisitorVoid() {
 
         override fun visitFunctionDeclaration(function: KSFunctionDeclaration, data: Unit) {
             super.visitFunctionDeclaration(function, data)
@@ -153,6 +185,7 @@ class CaliperProxyRulesAggregationProcessor(
             val proxyMethod = ProxyMethod(
                 methodName = functionName,
                 params = paramList,
+                modifiers = listOf(),
                 returnType = functionReturnType,
                 targetClassName = targetClassName,
                 targetElementName = targetElementName,
@@ -161,9 +194,10 @@ class CaliperProxyRulesAggregationProcessor(
             )
             val metaData = metadataMap.getOrPut(className) {
                 ProxyMetaData(
-                    className = currClass.asStarProjectedType().toTypeName().toJTypeName(),
+                    classTypeName = currClass.asStarProjectedType().toTypeName().toJTypeName(),
                     sourceRef = currClass.containingFile!!,
-                    methods = mutableListOf()
+                    methods = mutableListOf(),
+                    targetClass = null
                 )
             }
 

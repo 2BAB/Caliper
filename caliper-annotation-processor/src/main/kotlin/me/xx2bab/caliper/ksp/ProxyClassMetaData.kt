@@ -2,18 +2,19 @@ package me.xx2bab.caliper.ksp
 
 import com.google.devtools.ksp.symbol.KSFile
 import com.squareup.javapoet.TypeName
-import kotlinx.serialization.Transient
-import kotlin.reflect.KClass
+import javax.lang.model.element.Modifier
 
 data class ProxyMetaData(
-    val className: TypeName,
+    val classTypeName: TypeName,
     val sourceRef: KSFile,
-    var methods: MutableList<ProxyMethod>
+    var methods: MutableList<ProxyMethod>,
+    var targetClass: String?
 )
 
 data class ProxyMethod(
     val methodName: String,
     val params: List<MethodParam>,
+    val modifiers: List<Modifier>,
     val returnType: TypeName?,
     val targetClassName: String,
     val targetElementName: String, // methodName or fieldName

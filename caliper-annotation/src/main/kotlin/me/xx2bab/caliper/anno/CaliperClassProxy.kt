@@ -6,7 +6,4 @@ package me.xx2bab.caliper.anno
  */
 @Target(AnnotationTarget.CLASS)
 @Retention(AnnotationRetention.SOURCE)
-annotation class CaliperClassProxy(
-    val className: String,
-    val opcode: Int
-)
+annotation class CaliperClassProxy(val className: String)

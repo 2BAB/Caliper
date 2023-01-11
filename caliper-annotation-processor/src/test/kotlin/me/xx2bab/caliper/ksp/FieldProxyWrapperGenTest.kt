@@ -5,6 +5,7 @@ import me.xx2bab.caliper.anno.ASMOpcodes
 import me.xx2bab.caliper.common.Constants
 import me.xx2bab.caliper.common.Constants.KSP_OPTION_ANDROID_APP
 import org.hamcrest.MatcherAssert.assertThat
+import org.hamcrest.Matchers
 import org.hamcrest.text.IsEqualCompressingWhiteSpace.equalToCompressingWhiteSpace
 import org.junit.jupiter.api.Test
 import java.io.File
@@ -39,6 +40,8 @@ class FieldProxyWrapperGenTest {
             symbolProcessorProviders = listOf(CaliperProxyRulesAggregationProcessorProvider())
             kspArgs = mutableMapOf<String, String>(KSP_OPTION_ANDROID_APP to "true")
         }.compile()
+        assertThat(result.exitCode, Matchers.`is`(KotlinCompilation.ExitCode.OK))
+
         val kspGenDir = compilationTool.kspSourcesDir
 
         val generatedClass = File(
@@ -84,6 +87,8 @@ class FieldProxyWrapperGenTest {
             symbolProcessorProviders = listOf(CaliperProxyRulesAggregationProcessorProvider())
             kspArgs = mutableMapOf<String, String>(KSP_OPTION_ANDROID_APP to "true")
         }.compile()
+        assertThat(result.exitCode, Matchers.`is`(KotlinCompilation.ExitCode.OK))
+
         val kspGenDir = compilationTool.kspSourcesDir
 
         val generatedClass = File(

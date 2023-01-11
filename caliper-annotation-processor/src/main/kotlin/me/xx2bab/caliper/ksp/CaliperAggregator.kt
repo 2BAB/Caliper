@@ -33,6 +33,7 @@ class CaliperAggregator(
                 )
                 aggregatedMetadata.proxiedMethods.addAll(subMetaData.proxiedMethods)
                 aggregatedMetadata.proxiedFields.addAll(subMetaData.proxiedFields)
+                aggregatedMetadata.proxiedClasses.addAll(subMetaData.proxiedClasses)
             }
     }
 

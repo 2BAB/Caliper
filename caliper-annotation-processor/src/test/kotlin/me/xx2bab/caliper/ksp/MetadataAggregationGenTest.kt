@@ -11,21 +11,23 @@ class MetadataAggregationGenTest {
 
     @Test
     fun `Metadata files aggregation generated successfully`() {
-        val metaFileWithProxyMethod1 = SourceFile.fromPath(
+        val metaFileWithProxyMethod = SourceFile.fromPath(
             File("src/test/resources/ProxyWrittenInJavaForMethodProxy_CaliperWrapper.java"))
-        val metaFileWithProxyField1 = SourceFile.fromPath(
+        val metaFileWithProxyField = SourceFile.fromPath(
             File("src/test/resources/ProxyWrittenInJavaForFieldProxy_CaliperWrapper.java"))
-
+        val metaFileWithProxyClass = SourceFile.fromPath(
+            File("src/test/resources/ThreadClassProxyWrittenInJava_CaliperWrapper.java")
+        )
 
         val compilationTool = KotlinCompilation()
         val result = compilationTool.apply {
-            sources = listOf(metaFileWithProxyMethod1, metaFileWithProxyField1)
+            sources = listOf(metaFileWithProxyMethod, metaFileWithProxyField, metaFileWithProxyClass)
             inheritClassPath = true
             messageOutputStream = System.out // see diagnostics in real time
             // KSP
             kspWithCompilation = true
             symbolProcessorProviders = listOf(CaliperProxyRulesAggregationProcessorProvider())
-            kspArgs = mutableMapOf<String, String>(Constants.KSP_OPTION_ANDROID_APP to "true")
+            kspArgs = mutableMapOf(Constants.KSP_OPTION_ANDROID_APP to "true")
         }.compile()
         val kspGenDir = compilationTool.kspSourcesDir
         println("[Caliper][KSP] test kspGenDir: $kspGenDir")
