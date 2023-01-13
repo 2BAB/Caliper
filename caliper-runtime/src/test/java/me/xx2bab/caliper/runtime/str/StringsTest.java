@@ -1,10 +1,11 @@
-package me.xx2bab.caliper.runtime;
+package me.xx2bab.caliper.runtime.str;
 
-import org.junit.jupiter.api.Test;
+
+import org.junit.Test;
 
 import java.math.BigInteger;
+import static org.junit.Assert.assertEquals;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public final class StringsTest {
     @Test

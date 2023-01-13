@@ -20,10 +20,19 @@ android {
     kotlinOptions {
         jvmTarget = "1.8"
     }
+
+    testOptions {
+        unitTests {
+            isIncludeAndroidResources = true
+        }
+    }
 }
 
 dependencies {
     implementation(projects.caliperAnnotation)
+    implementation(deps.androidx.annotation)
     compileOnly(deps.asm.core)
-    testImplementation(deps.junit5)
+    testImplementation(deps.junit4)
+    testImplementation(deps.mockk)
+    testImplementation(deps.robolectric)
 }

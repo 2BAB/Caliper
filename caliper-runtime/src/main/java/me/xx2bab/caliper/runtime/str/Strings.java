@@ -1,4 +1,4 @@
-package me.xx2bab.caliper.runtime;
+package me.xx2bab.caliper.runtime.str;
 
 import java.util.Arrays;
 import java.util.HashSet;
@@ -12,8 +12,8 @@ import java.util.Set;
  *
  * License under the Apache License 2.0.
  */
-final class Strings {
-    static String toString(Object obj) {
+public final class Strings {
+    public static String toString(Object obj) {
         if (obj == null) {
             return "null";
         }
