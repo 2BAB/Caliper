@@ -1,23 +1,14 @@
 package me.xx2bab.caliper
 
-import com.android.build.api.artifact.SingleArtifact
 import com.android.build.api.instrumentation.FramesComputationMode
 import com.android.build.api.instrumentation.InstrumentationScope
 import com.android.build.api.variant.ApplicationAndroidComponentsExtension
-import com.android.build.api.variant.Variant
 import com.android.build.gradle.AppPlugin
-import com.android.build.gradle.internal.tasks.factory.dependsOn
-import com.google.devtools.ksp.gradle.KspExtension
-import groovy.lang.Closure
 import me.xx2bab.caliper.common.Constants.CALIPER_AGGREGATE_METADATA_FILE_NAME
 import org.gradle.api.Plugin
 import org.gradle.api.Project
-import org.gradle.api.file.Directory
-import org.gradle.api.provider.Provider
 import org.gradle.api.tasks.CacheableTask
-import org.gradle.kotlin.dsl.register
 import org.gradle.kotlin.dsl.withType
-import java.util.*
 import java.util.concurrent.atomic.AtomicBoolean
 
 @CacheableTask
