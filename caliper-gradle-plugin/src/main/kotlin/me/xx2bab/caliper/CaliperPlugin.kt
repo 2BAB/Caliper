@@ -1,11 +1,15 @@
 package me.xx2bab.caliper
 
 import com.android.build.api.artifact.SingleArtifact
+import com.android.build.api.instrumentation.FramesComputationMode
+import com.android.build.api.instrumentation.InstrumentationScope
 import com.android.build.api.variant.ApplicationAndroidComponentsExtension
 import com.android.build.api.variant.Variant
 import com.android.build.gradle.AppPlugin
 import com.android.build.gradle.internal.tasks.factory.dependsOn
+import com.google.devtools.ksp.gradle.KspExtension
 import groovy.lang.Closure
+import me.xx2bab.caliper.common.Constants.CALIPER_AGGREGATE_METADATA_FILE_NAME
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.file.Directory
@@ -39,6 +43,9 @@ abstract class CaliperPlugin : Plugin<Project> {
         project.plugins.withType<AppPlugin> {
             androidAppPluginApplied.set(true)
 
+            val aggregatedConfigInJsonString = project.layout.buildDirectory
+                .file("generated/ksp/main/resources/$CALIPER_AGGREGATE_METADATA_FILE_NAME.json")
+                .map { it.asFile.readText() }
             val androidExtension = project.extensions.getByType(ApplicationAndroidComponentsExtension::class.java)
             androidExtension.onVariants { appVariant ->
                 if (!CaliperExtension.isFeatureEnabled(
@@ -50,6 +57,15 @@ abstract class CaliperPlugin : Plugin<Project> {
                     return@onVariants
                 }
 
+                appVariant.instrumentation
+                    .transformClassesWith(
+                        CaliperClassVisitorFactory::class.java,
+                        InstrumentationScope.ALL
+                    ) {
+                        it.proxyConfigInJsonString.set(aggregatedConfigInJsonString)
+                    }
+                appVariant.instrumentation
+                    .setAsmFramesComputationMode(FramesComputationMode.COPY_FRAMES)
             }
         }
     }

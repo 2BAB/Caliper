@@ -1,8 +1,8 @@
 plugins {
     `kotlin-dsl`
+    id("org.jetbrains.kotlin.plugin.serialization") version "1.7.0"
     id("java-gradle-plugin")
     `github-release`
-//    `maven-central-publish`
 }
 
 version = BuildConfig.Versions.caliperVersion
@@ -17,6 +17,7 @@ dependencies {
     implementation(deps.asm.core)
     implementation(deps.asm.commons)
     implementation(deps.asm.util)
+    implementation(deps.kotlin.serialization)
 
     // Tests
     testImplementation(deps.hamcrest)

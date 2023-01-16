@@ -6,7 +6,8 @@ import com.tschuchort.compiletesting.SourceFile
 import me.xx2bab.caliper.anno.ASMOpcodes
 import me.xx2bab.caliper.common.ProxiedField
 import me.xx2bab.caliper.common.ProxiedMethod
-import me.xx2bab.caliper.core.CaliperASMManipulator
+import me.xx2bab.caliper.core.ASMManipulator
+import me.xx2bab.caliper.core.CaliperClassVisitor
 import me.xx2bab.caliper.core.ProxyConfig
 import me.xx2bab.caliper.tool.checkByteCodeIntegrity
 import me.xx2bab.caliper.tool.getFieldValueInString
@@ -14,6 +15,7 @@ import me.xx2bab.caliper.tool.invokeMethod
 import org.hamcrest.MatcherAssert
 import org.hamcrest.Matchers.`is`
 import org.junit.jupiter.api.Test
+import org.objectweb.asm.Opcodes
 
 class StaticMethodAndFieldProxyTest {
 
@@ -70,8 +72,12 @@ class StaticMethodAndFieldProxyTest {
 
         // Manipulate bytecodes
         val compiledTestClassFile = result.getCompiledFileByName("TestCaseForBuildSerial.class")
-        val asmManipulator = CaliperASMManipulator(
+        val asmManipulator = ASMManipulator(
             inputClassFile = compiledTestClassFile,
+        )
+        val classVisitor = CaliperClassVisitor(
+            api = Opcodes.ASM9,
+            classVisitor = asmManipulator.writer,
             config = ProxyConfig(
                 proxiedMethods = mutableListOf(),
                 proxiedFields = mutableListOf(
@@ -85,7 +91,7 @@ class StaticMethodAndFieldProxyTest {
                 )
             ),
         )
-        asmManipulator.processInPlace()
+        asmManipulator.processInPlace(classVisitor)
 
         // ByteCode integrity check
         val errorLog = compiledTestClassFile.checkByteCodeIntegrity()
@@ -177,8 +183,12 @@ class StaticMethodAndFieldProxyTest {
 
 
         val compiledTestClassFile = result.getCompiledFileByName("TestCaseForSecure.class")
-        val asmManipulator = CaliperASMManipulator(
+        val asmManipulator = ASMManipulator(
             inputClassFile = compiledTestClassFile,
+        )
+        val classVisitor = CaliperClassVisitor(
+            api = Opcodes.ASM9,
+            classVisitor = asmManipulator.writer,
             config = ProxyConfig(
                 proxiedMethods = mutableListOf(
                     ProxiedMethod(
@@ -191,7 +201,7 @@ class StaticMethodAndFieldProxyTest {
                 )
             ),
         )
-        asmManipulator.processInPlace()
+        asmManipulator.processInPlace(classVisitor)
 
         val errorLog = compiledTestClassFile.checkByteCodeIntegrity()
         MatcherAssert.assertThat(

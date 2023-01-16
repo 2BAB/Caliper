@@ -2,17 +2,15 @@ package me.xx2bab.caliper.proxy
 
 import com.tschuchort.compiletesting.KotlinCompilation
 import com.tschuchort.compiletesting.SourceFile
-import me.xx2bab.caliper.anno.ASMOpcodes
 import me.xx2bab.caliper.common.ProxiedClass
-import me.xx2bab.caliper.common.ProxiedField
-import me.xx2bab.caliper.common.ProxiedMethod
-import me.xx2bab.caliper.core.CaliperASMManipulator
+import me.xx2bab.caliper.core.ASMManipulator
+import me.xx2bab.caliper.core.CaliperClassVisitor
 import me.xx2bab.caliper.core.ProxyConfig
-import me.xx2bab.caliper.tool.checkByteCodeIntegrity
 import me.xx2bab.caliper.tool.invokeMethod
 import org.hamcrest.MatcherAssert
 import org.hamcrest.Matchers
 import org.junit.jupiter.api.Test
+import org.objectweb.asm.Opcodes
 
 class ClassProxyTest {
 
@@ -67,8 +65,12 @@ class ClassProxyTest {
         MatcherAssert.assertThat(result.exitCode, Matchers.`is`(KotlinCompilation.ExitCode.OK))
 
         val compiledTestClassFile = result.getCompiledFileByName("TestCaseForThreadProxy.class")
-        val asmManipulator = CaliperASMManipulator(
+        val asmManipulator = ASMManipulator(
             inputClassFile = compiledTestClassFile,
+        )
+        val classVisitor = CaliperClassVisitor(
+            api = Opcodes.ASM9,
+            classVisitor = asmManipulator.writer,
             config = ProxyConfig(
                 proxiedClasses = mutableListOf(
                     ProxiedClass(
@@ -76,9 +78,9 @@ class ClassProxyTest {
                         replacedClassName = "NamedThread"
                     )
                 )
-            ),
+            )
         )
-        asmManipulator.processInPlace()
+        asmManipulator.processInPlace(classVisitor)
 
 //        val errorLog = compiledTestClassFile.checkByteCodeIntegrity()
 //        MatcherAssert.assertThat(
