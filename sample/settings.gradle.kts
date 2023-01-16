@@ -18,7 +18,7 @@ pluginManagement {
             if (requested.id.id == "me.2bab.caliper") {
                 // It will be replaced by a local module using `includeBuild` below,
                 // thus we just put a generic version (+) here.
-                useModule("me.2bab:caliper:+")
+                useModule("me.2bab:caliper-gradle-plugin:+")
             }
         }
     }
@@ -49,12 +49,16 @@ include(":app")
 if (enabledCompositionBuild) {
     includeBuild(externalDependencyBaseDir) {
         dependencySubstitution {
-            substitute(module("me.2bab:caliper"))
+            substitute(module("me.2bab:caliper-gradle-plugin"))
                 .using(project(":caliper-gradle-plugin"))
-            substitute(module("me.2bab:caliper-runtime"))
-                .using(project(":caliper-runtime"))
             substitute(module("me.2bab:caliper-annotation-processor"))
                 .using(project(":caliper-annotation-processor"))
+            substitute(module("me.2bab:caliper-runtime"))
+                .using(project(":caliper-runtime"))
+            substitute(module("me.2bab:caliper-runtime-battery-optim"))
+                .using(project(":caliper-runtime-battery-optim"))
+            substitute(module("me.2bab:caliper-runtime-privacy"))
+                .using(project(":caliper-runtime-privacy"))
         }
     }
 }

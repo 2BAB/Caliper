@@ -1,4 +1,4 @@
-package me.xx2bab.caliper.core
+package me.xx2bab.caliper.gradle.core
 
 import me.xx2bab.caliper.common.*
 

@@ -101,10 +101,10 @@ java {
 
 gradlePlugin {
     plugins {
-        register("caliper") {
+        register("me.2bab.caliper") {
             id = "me.2bab.caliper"
-            implementationClass ="me.xx2bab.caliper.CaliperPlugin"
-            displayName = "me.2bab.caliper"
+            implementationClass ="me.xx2bab.caliper.gradle.CaliperPlugin"
+            displayName = "Caliper Gradle Plugin"
         }
     }
     testSourceSets.add(sourceSets["integrationTest"])

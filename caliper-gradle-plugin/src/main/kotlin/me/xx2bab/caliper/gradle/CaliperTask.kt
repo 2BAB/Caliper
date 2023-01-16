@@ -1,4 +1,4 @@
-package me.xx2bab.caliper
+package me.xx2bab.caliper.gradle
 
 import org.gradle.api.DefaultTask
 import org.gradle.api.NamedDomainObjectContainer

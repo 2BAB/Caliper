@@ -6,8 +6,8 @@ import me.xx2bab.caliper.anno.ASMOpcodes
 import me.xx2bab.caliper.common.ProxiedField
 import me.xx2bab.caliper.common.ProxiedMethod
 import me.xx2bab.caliper.core.ASMManipulator
-import me.xx2bab.caliper.core.CaliperClassVisitor
-import me.xx2bab.caliper.core.ProxyConfig
+import me.xx2bab.caliper.gradle.core.CaliperClassVisitor
+import me.xx2bab.caliper.gradle.core.ProxyConfig
 import me.xx2bab.caliper.tool.checkByteCodeIntegrity
 import me.xx2bab.caliper.tool.invokeMethod
 import org.hamcrest.MatcherAssert

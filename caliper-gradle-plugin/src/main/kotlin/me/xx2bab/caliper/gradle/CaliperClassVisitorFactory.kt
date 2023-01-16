@@ -1,4 +1,4 @@
-package me.xx2bab.caliper
+package me.xx2bab.caliper.gradle
 
 import com.android.build.api.instrumentation.AsmClassVisitorFactory
 import com.android.build.api.instrumentation.ClassContext
@@ -6,9 +6,9 @@ import com.android.build.api.instrumentation.ClassData
 import com.android.build.api.instrumentation.InstrumentationParameters
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.decodeFromString
-import me.xx2bab.caliper.core.CaliperClassVisitor
-import me.xx2bab.caliper.core.GradleKLogger
-import me.xx2bab.caliper.core.ProxyConfig
+import me.xx2bab.caliper.gradle.core.CaliperClassVisitor
+import me.xx2bab.caliper.gradle.core.GradleKLogger
+import me.xx2bab.caliper.gradle.core.ProxyConfig
 import org.gradle.api.logging.Logger
 import org.gradle.api.provider.Property
 import org.gradle.api.tasks.Input
@@ -30,9 +30,11 @@ interface CaliperClassVisitorFactoryParam : InstrumentationParameters {
 
 abstract class CaliperClassVisitorFactory : AsmClassVisitorFactory<CaliperClassVisitorFactoryParam> {
 
-    private val proxyConfig = Json.decodeFromString<ProxyConfig>(
-        parameters.get().proxyConfigInJsonString.get()
-    )
+    private val proxyConfig by lazy {
+        Json.decodeFromString<ProxyConfig>(
+            parameters.get().proxyConfigInJsonString.get()
+        )
+    }
 
     override fun createClassVisitor(
         classContext: ClassContext,

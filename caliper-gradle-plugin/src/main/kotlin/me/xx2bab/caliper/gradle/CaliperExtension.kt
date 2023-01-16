@@ -1,11 +1,8 @@
-package me.xx2bab.caliper
+package me.xx2bab.caliper.gradle
 
 import com.android.build.api.variant.Variant
 import groovy.lang.Closure
-import org.gradle.api.Action
-import org.gradle.api.NamedDomainObjectContainer
 import org.gradle.api.model.ObjectFactory
-import org.gradle.api.provider.Property
 import javax.inject.Inject
 
 abstract class CaliperExtension @Inject constructor(

@@ -39,6 +39,6 @@ include(
     ":gradle-instrumented-kit",
 
     ":caliper-runtime",
-    ":caliper-runtime-battery-metric",
-    ":caliper-runtime-sensitive-permission",
+    ":caliper-runtime-battery-optim",
+    ":caliper-runtime-privacy",
 )

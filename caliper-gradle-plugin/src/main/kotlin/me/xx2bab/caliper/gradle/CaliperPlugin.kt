@@ -1,4 +1,4 @@
-package me.xx2bab.caliper
+package me.xx2bab.caliper.gradle
 
 import me.xx2bab.caliper.gradle.build.BuildConfig
 import com.android.build.api.instrumentation.FramesComputationMode
