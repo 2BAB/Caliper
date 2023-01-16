@@ -11,6 +11,7 @@ pluginManagement {
     plugins {
         kotlin("android") version getVersion("kotlinVer") apply false
         id("com.android.application") version getVersion("agpVer") apply false
+        id("com.google.devtools.ksp") version getVersion("kspVer") apply false
     }
     resolutionStrategy {
         eachPlugin {
@@ -50,6 +51,10 @@ if (enabledCompositionBuild) {
         dependencySubstitution {
             substitute(module("me.2bab:caliper"))
                 .using(project(":caliper-gradle-plugin"))
+            substitute(module("me.2bab:caliper-runtime"))
+                .using(project(":caliper-runtime"))
+            substitute(module("me.2bab:caliper-annotation-processor"))
+                .using(project(":caliper-annotation-processor"))
         }
     }
 }

@@ -1,7 +1,6 @@
 [versions]
 kotlinVer = "1.7.22"
 agpVer = "7.2.2"
-polyfillVer = "0.8.0"
 asmVer = "9.4"
 kotlinpoetVer = "1.12.0"
 kspVer = "1.7.22-1.0.8"
@@ -11,7 +10,7 @@ android-gradle-plugin = { module = "com.android.tools.build:gradle", version.ref
 android-gradle-pluginapi = { module = "com.android.tools.build:gradle-api", version.ref = "agpVer" }
 kotlin-std = { module = "org.jetbrains.kotlin:kotlin-stdlib-jdk8", version.ref = "kotlinVer" }
 kotlin-serialization = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version = "1.4.1" }
-apache-common-text = { module = "org.apache.commons:commons-text", version = "1.10.0"}
+apache-common-text = { module = "org.apache.commons:commons-text", version = "1.10.0" }
 javapoet = { module = "com.squareup:javapoet", version = "1.13.0" }
 kotlinpoet = { module = "com.squareup:kotlinpoet", version.ref = "kotlinpoetVer" }
 kotlinpoet-interop-javapoet = { module = "com.squareup:kotlinpoet-javapoet", version.ref = "kotlinpoetVer" }
@@ -20,7 +19,7 @@ asm-core = { module = "org.ow2.asm:asm", version.ref = "asmVer" }
 asm-commons = { module = "org.ow2.asm:asm-commons", version.ref = "asmVer" }
 asm-util = { module = "org.ow2.asm:asm-util", version.ref = "asmVer" }
 ksp-api = { module = "com.google.devtools.ksp:symbol-processing-api", version.ref = "kspVer" }
-androidx-annotation = { module = "androidx.annotation:annotation", version = "1.5.0"}
+androidx-annotation = { module = "androidx.annotation:annotation", version = "1.5.0" }
 junit4 = { module = "junit:junit", version = "4.13.2" }
 junit5 = { module = "org.junit.jupiter:junit-jupiter", version = "5.9.2" }
 robolectric = { module = "org.robolectric:robolectric", version = "4.9.2" }
@@ -33,3 +32,4 @@ kotlin-compile-testing-ksp = { module = "com.github.tschuchortdev:kotlin-compile
 [bundles]
 
 [plugins]
+build-config = { id = "com.github.gmazzo.buildconfig", version = "3.1.0" }

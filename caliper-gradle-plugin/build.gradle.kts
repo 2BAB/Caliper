@@ -3,6 +3,7 @@ plugins {
     id("org.jetbrains.kotlin.plugin.serialization") version "1.7.0"
     id("java-gradle-plugin")
     `github-release`
+    alias(deps.plugins.build.config)
 }
 
 version = BuildConfig.Versions.caliperVersion
@@ -108,4 +109,10 @@ gradlePlugin {
     }
     testSourceSets.add(sourceSets["integrationTest"])
     testSourceSets.add(sourceSets["functionalTest"])
+}
+
+buildConfig {
+    packageName("me.xx2bab.caliper.gradle.build")
+    useKotlinOutput()
+    buildConfigField("String", "CALIPER_VERSION", "\"${BuildConfig.Versions.caliperVersion}\"")
 }

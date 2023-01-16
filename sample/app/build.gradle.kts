@@ -1,10 +1,13 @@
 plugins {
     id("com.android.application")
     kotlin("android")
+
+    id("com.google.devtools.ksp") // Apply the KSP plugin ahead of Caliper
     id("me.2bab.caliper")
 }
 
 android {
+    namespace = "me.xx2bab.caliper.sample"
     compileSdk = 31
     defaultConfig {
         applicationId = "me.xx2bab.caliper.sample"
@@ -60,7 +63,6 @@ android {
     }
 }
 
-
 dependencies {
     implementation(deps.kotlin.std)
     implementation("androidx.appcompat:appcompat:1.4.1")
@@ -72,7 +74,6 @@ caliper {
     // Can not be lazily set, it's a valid only if you call it before "afterEvaluate{}".
     // With below snippet, only "FullDebug" variant will be interacted with Caliper.
     enableByVariant { variant ->
-        variant.name.contains("debug", true)
-                && variant.name.contains("full", true)
+        variant.buildType == "debug" && variant.flavorName == "full"
     }
 }
