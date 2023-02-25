@@ -1,5 +1,7 @@
 plugins {
     id("com.android.application")
+
+    id("com.google.devtools.ksp")
     id("me.2bab.caliper")
 }
 android {

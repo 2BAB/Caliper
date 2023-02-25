@@ -16,13 +16,6 @@ class CaliperMethodVisitor(
     private val logger: KLogger = DefaultKotlinLogger()
 ) : AdviceAdapter(ASM9, superVisitor, access, methodName, descriptor) {
 
-//    override fun visitInsn(opcode: Int) {
-//        super.visitInsn(opcode)
-//        logger.info(
-//            "[CaliperMethodVisitor] visitInsn class = $className , opcode = $opcode"
-//        )
-//    }
-
     private var isNewOperationCodeFound = false
 
     override fun visitTypeInsn(opcode: Int, type: String?) {
@@ -150,9 +143,5 @@ class CaliperMethodVisitor(
         super.visitMethodInsn(opcode, owner, methodName, descriptor, isInterface)
     }
 
-    override fun visitEnd() {
-        visitMaxs(0, 0)
-        super.visitEnd()
-    }
 
 }

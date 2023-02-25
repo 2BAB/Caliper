@@ -4,6 +4,7 @@ plugins {
 }
 
 android {
+    namespace = "me.xx2bab.caliper.runtime.core"
     compileSdk = 31
     defaultConfig {
         minSdk = 21
@@ -13,12 +14,12 @@ android {
     sourceSets["main"].java.srcDir("src/main/kotlin")
 
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_1_8
-        targetCompatibility = JavaVersion.VERSION_1_8
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
     }
 
     kotlinOptions {
-        jvmTarget = "1.8"
+        jvmTarget = "17"
     }
 
     testOptions {
@@ -29,7 +30,7 @@ android {
 }
 
 dependencies {
-    implementation(projects.caliperAnnotation)
+    api(projects.caliperAnnotation)
     implementation(deps.androidx.annotation)
     compileOnly(deps.asm.core)
     testImplementation(deps.junit4)

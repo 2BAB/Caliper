@@ -14,7 +14,7 @@ android {
         minSdk = 23
         targetSdk = 31
         versionCode = 1
-        versionName = "3.2.0"
+        versionName = "1.0.0"
     }
 
     buildTypes {
@@ -54,18 +54,23 @@ android {
     sourceSets["main"].java.srcDir("src/main/kotlin")
 
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_1_8
-        targetCompatibility = JavaVersion.VERSION_1_8
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
     }
 
     kotlinOptions {
-        jvmTarget = "1.8"
+        jvmTarget = "17"
     }
+
 }
 
 dependencies {
+    implementation(project(":library"))
     implementation(deps.kotlin.std)
     implementation("androidx.appcompat:appcompat:1.4.1")
+
+    caliper("me.2bab:caliper-runtime-privacy:+")
+    caliper(project(":custom-proxy"))
 }
 
 // Run `./gradlew clean assembleFullDebug` for testing
@@ -74,6 +79,7 @@ caliper {
     // Can not be lazily set, it's a valid only if you call it before "afterEvaluate{}".
     // With below snippet, only "FullDebug" variant will be interacted with Caliper.
     enableByVariant { variant ->
-        variant.buildType == "debug" && variant.flavorName == "full"
+//        variant.buildType == "debug" && variant.flavorName == "full"
+        true
     }
 }

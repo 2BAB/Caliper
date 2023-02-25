@@ -11,6 +11,7 @@ pluginManagement {
     plugins {
         kotlin("android") version getVersion("kotlinVer") apply false
         id("com.android.application") version getVersion("agpVer") apply false
+        id("com.android.library") version getVersion("agpVer") apply false
         id("com.google.devtools.ksp") version getVersion("kspVer") apply false
     }
     resolutionStrategy {
@@ -45,7 +46,7 @@ dependencyResolutionManagement {
     }
 }
 
-include(":app")
+include(":app", ":library", ":custom-proxy")
 if (enabledCompositionBuild) {
     includeBuild(externalDependencyBaseDir) {
         dependencySubstitution {

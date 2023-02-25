@@ -17,7 +17,7 @@ class CaliperProxyRulesAggregationProcessorProvider : SymbolProcessorProvider {
     ): SymbolProcessor {
         val logger = KSPLoggerWrapper(env.logger)
         val isAndroidAppModule = env.options[KSP_OPTION_ANDROID_APP].toBoolean()
-        logger.lifecycle("isAndroidAppModule: $isAndroidAppModule")
+        logger.info("isAndroidAppModule: $isAndroidAppModule")
         return CaliperProxyRulesAggregationProcessor(
             isAndroidAppModule, env.codeGenerator, logger
         )
@@ -36,38 +36,29 @@ class CaliperProxyRulesAggregationProcessor(
     // For per module
     private val metadataMap: MutableMap<String, ProxyMetaData> = mutableMapOf()
 
-    // For app module only
-    private val subMetaDataCollected = AtomicBoolean(false)
-    private val aggregatedMetadata = ProxiedMetaData()
-    private lateinit var aggregator: CaliperAggregator
-
     companion object {
         const val ERROR_ILLEGAL_CLASS_NAME = "The annotated class is not valid with qualified name."
         const val ERROR_ILLEGAL_CLASS_STRUCTURE = "The annotated element is not wrapped by a class."
         const val ERROR_MULTI_CALIPER_ANNOTATIONS =
             "More than one Caliper annotation is found on the current element %s."
-        const val ERROR_NO_CALIPER_ANNOTATION = "No Caliper annotation is found on the current element %s."
+        const val ERROR_NO_CALIPER_ANNOTATION =
+            "No Caliper annotation is found on the current element %s."
     }
 
     override fun process(resolver: Resolver): List<KSAnnotated> {
-        logger.lifecycle("process")
+        logger.info("process")
 
-        // Load metadata from subprojects, put all of them into the `exportMetadata` of main project,
-        val methodAndFieldSymbols = resolver.getSymbolsWithAnnotation(CaliperMethodProxy::class.qualifiedName!!)
-            .plus(resolver.getSymbolsWithAnnotation(CaliperFieldProxy::class.qualifiedName!!))
-        logger.lifecycle("Method + Field symbols: ${methodAndFieldSymbols.toList().size}")
+        val methodAndFieldSymbols =
+            resolver.getSymbolsWithAnnotation(CaliperMethodProxy::class.qualifiedName!!)
+                .plus(resolver.getSymbolsWithAnnotation(CaliperFieldProxy::class.qualifiedName!!))
+        logger.info("Method + Field symbols: ${methodAndFieldSymbols.toList().size}")
         methodAndFieldSymbols.filter { it is KSFunctionDeclaration && it.validate() }
             .forEach { it.accept(MetaCollectorForMethodAndFieldProxy(), Unit) }
 
-        val classSymbols = resolver.getSymbolsWithAnnotation(CaliperClassProxy::class.qualifiedName!!)
+        val classSymbols =
+            resolver.getSymbolsWithAnnotation(CaliperClassProxy::class.qualifiedName!!)
         classSymbols.filter { it is KSClassDeclaration && it.validate() }
             .forEach { it.accept(MetaCollectorForClass(), Unit) }
-
-        if (!subMetaDataCollected.get()) {
-            subMetaDataCollected.set(true)
-            aggregator = CaliperAggregator(logger)
-            aggregator.collect(aggregatedMetadata, resolver)
-        }
 
         // To simplify the workflow, we only support one round processing,
         // since all proxy class are designated to be fixed (resolved elements).
@@ -76,17 +67,10 @@ class CaliperProxyRulesAggregationProcessor(
 
     override fun finish() {
         super.finish()
-        logger.lifecycle("finish")
-        logger.lifecycle("metadataMap size: ${metadataMap.size}")
+        logger.info("finish")
+        logger.info("current metadataMap size: ${metadataMap.size}")
         val generator = CaliperWrapperGenerator(metadataMap, codeGenerator, logger)
-        val currProxiedMetadata = generator.generate()
-        if (isAndroidAppModule) {
-            aggregatedMetadata.proxiedClasses.addAll(currProxiedMetadata.proxiedClasses)
-            aggregatedMetadata.proxiedMethods.addAll(currProxiedMetadata.proxiedMethods)
-            aggregatedMetadata.proxiedFields.addAll(currProxiedMetadata.proxiedFields)
-            aggregatedMetadata.mapKSFiles.addAll(currProxiedMetadata.mapKSFiles)
-            aggregator.generate(aggregatedMetadata, codeGenerator)
-        }
+        generator.generate()
     }
 
     @OptIn(KotlinPoetJavaPoetPreview::class)
@@ -106,7 +90,8 @@ class CaliperProxyRulesAggregationProcessor(
             val targetClassName = classProxyAnnotation.getParamValueByKey("className").toString()
             metadataMap.getOrPut(validClassName) {
                 ProxyMetaData(
-                    classTypeName = classDeclaration.asStarProjectedType().toTypeName().toJTypeName(),
+                    classTypeName = classDeclaration.asStarProjectedType().toTypeName()
+                        .toJTypeName(),
                     sourceRef = classDeclaration.containingFile!!,
                     methods = mutableListOf(),
                     targetClass = targetClassName
@@ -124,7 +109,7 @@ class CaliperProxyRulesAggregationProcessor(
             logger.info("visitFunctionDeclaration")
 
             val functionName = function.simpleName.asString()
-            logger.lifecycle("functionName = $functionName")
+            logger.info("functionName = $functionName")
 
             val methodProxyAnnotation =
                 function.annotations.firstOrNull { it.shortName.asString() == CaliperMethodProxy::class.simpleName }
@@ -141,8 +126,9 @@ class CaliperProxyRulesAggregationProcessor(
 
             val validAnno = methodProxyAnnotation ?: fieldProxyAnnotation!!
             val targetClassName = validAnno.getParamValueByKey("className").toString()
-            val targetElementName = methodProxyAnnotation?.getParamValueByKey("methodName")?.toString()
-                ?: fieldProxyAnnotation!!.getParamValueByKey("fieldName").toString()
+            val targetElementName =
+                methodProxyAnnotation?.getParamValueByKey("methodName")?.toString()
+                    ?: fieldProxyAnnotation!!.getParamValueByKey("fieldName").toString()
             val targetOpcode = validAnno.getParamValueByKey("opcode") as Int
 
             if ((function.parentDeclaration is KSClassDeclaration).not()) {
@@ -161,10 +147,10 @@ class CaliperProxyRulesAggregationProcessor(
             }
 
             val className = currClass.qualifiedName!!.asString()
-            logger.lifecycle("className = $className")
+            logger.info("className = $className")
 
             val functionReturnType = function.returnType?.toTypeName()?.toJTypeName()
-            logger.lifecycle("functionReturnType = $functionReturnType")
+            logger.info("functionReturnType = $functionReturnType")
 
             val functionParameters = function.parameters
             val paramList = mutableListOf<MethodParam>()
@@ -172,12 +158,14 @@ class CaliperProxyRulesAggregationProcessor(
                 if (it.name != null) {
                     paramList.add(
                         MethodParam(
-                            paramName = it.name!!.getShortName(), type = it.type.toTypeName().toJTypeName()
+                            paramName = it.name!!.getShortName(),
+                            type = it.type.toTypeName().toJTypeName()
                         )
                     )
                 } else {
                     logger.error(
-                        "Can not parse the element's name of the type " + it.type.toTypeName().toString()
+                        "Can not parse the element's name of the type " + it.type.toTypeName()
+                            .toString()
                     )
                 }
             }

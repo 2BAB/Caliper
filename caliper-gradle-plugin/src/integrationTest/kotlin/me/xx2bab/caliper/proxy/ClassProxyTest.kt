@@ -3,7 +3,7 @@ package me.xx2bab.caliper.proxy
 import com.tschuchort.compiletesting.KotlinCompilation
 import com.tschuchort.compiletesting.SourceFile
 import me.xx2bab.caliper.common.ProxiedClass
-import me.xx2bab.caliper.core.ASMManipulator
+import me.xx2bab.caliper.gradle.core.ASMManipulator
 import me.xx2bab.caliper.gradle.core.CaliperClassVisitor
 import me.xx2bab.caliper.gradle.core.ProxyConfig
 import me.xx2bab.caliper.tool.invokeMethod

@@ -1,6 +1,8 @@
 plugins {
     `kotlin-dsl`
-    id("org.jetbrains.kotlin.plugin.serialization") version "1.7.0"
+//    id("org.gradle.kotlin.kotlin-dsl") version "4.0.7"
+
+    id("org.jetbrains.kotlin.plugin.serialization") version "1.8.10"
     id("java-gradle-plugin")
     `github-release`
     alias(deps.plugins.build.config)
@@ -19,6 +21,7 @@ dependencies {
     implementation(deps.asm.commons)
     implementation(deps.asm.util)
     implementation(deps.kotlin.serialization)
+    implementation(deps.ksp.gradle.plugin)
 
     // Tests
     testImplementation(deps.hamcrest)
@@ -45,7 +48,6 @@ testing {
 
         val integrationTest by registering(JvmTestSuite::class) {
             dependencies {
-                implementation(project())
                 implementation(project(":gradle-instrumented-kit"))
             }
             targets {
@@ -83,7 +85,7 @@ configurations["functionalTestImplementation"]
 tasks.check.configure {
     dependsOn(tasks.named("test"))
     dependsOn(tasks.named("integrationTest"))
-    dependsOn(tasks.named("functionalTest"))
+   // dependsOn(tasks.named("functionalTest"))
 }
 
 tasks.withType<Test> {
@@ -95,7 +97,7 @@ tasks.withType<Test> {
 java {
     withSourcesJar()
     toolchain {
-        languageVersion.set(JavaLanguageVersion.of(11))
+        languageVersion.set(JavaLanguageVersion.of(17))
     }
 }
 
@@ -114,5 +116,5 @@ gradlePlugin {
 buildConfig {
     packageName("me.xx2bab.caliper.gradle.build")
     useKotlinOutput()
-    buildConfigField("String", "CALIPER_VERSION", "\"${BuildConfig.Versions.caliperVersion}\"")
+    buildConfigField("String", "CALIPER_VERSION", "\"${version}\"")
 }

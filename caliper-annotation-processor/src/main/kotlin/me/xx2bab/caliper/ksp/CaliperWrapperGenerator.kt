@@ -24,7 +24,7 @@ class CaliperWrapperGenerator(
     private val logger: KSPLoggerWrapper
 ) {
 
-    fun generate(): ProxiedMetaData {
+    fun generate() {
         val proxiedMetaData = ProxiedMetaData()
         metadataMap.forEach { (className, metadata) ->
             val wrapperSimpleClassName = className.split(".").last().toCaliperWrapperName()
@@ -38,17 +38,16 @@ class CaliperWrapperGenerator(
                         replacedClassName = className.replace(".", "/")
                     )
                 )
-                val annotationSpec = AnnotationSpec.builder(CaliperMeta::class.java)
-                    .addMember(
-                        "metadataInJSON",
-                        "\"${StringEscapeUtils.escapeJava(Json.encodeToString(proxiedMetaData).replace("$", "$$"))}\""
-                    )
-                    .build()
+//                val annotationSpec = AnnotationSpec.builder(CaliperMeta::class.java)
+//                    .addMember(
+//                        "metadataInJSON",
+//                        "\"${StringEscapeUtils.escapeJava(Json.encodeToString(proxiedMetaData).replace("$", "$$"))}\""
+//                    )
+//                    .build()
 
                 val classType =
                     TypeSpec.classBuilder(wrapperSimpleClassName)
                         .addModifiers(Modifier.PRIVATE, Modifier.FINAL)
-                        .addAnnotation(annotationSpec)
                         .build()
                 val javaFile = JavaFile.builder(Constants.CALIPER_PACKAGE_FOR_WRAPPER, classType)
                     .indent("    ")
@@ -140,7 +139,16 @@ class CaliperWrapperGenerator(
             //   The origin source could work as expect, so we leave it here.
             proxiedMetaData.mapKSFiles.add(metadata.sourceRef)
         }
-        return proxiedMetaData
+
+        val json = Json.encodeToString(proxiedMetaData)
+        val jsonFileOutputStream = codeGenerator.createNewFile(
+            dependencies = Dependencies(true, *proxiedMetaData.mapKSFiles.toTypedArray()),
+            packageName = "",
+            fileName = "aggregation.caliper",
+            extensionName = "json"
+        )
+        jsonFileOutputStream.write(json.toByteArray())
+        jsonFileOutputStream.close()
     }
 
     private fun String.toCaliperWrapperName() = this + "_CaliperWrapper"
