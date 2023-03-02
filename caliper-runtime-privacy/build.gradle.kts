@@ -10,10 +10,10 @@ android {
     compileSdk = 31
     defaultConfig {
         minSdk = 21
-        targetSdk = 31
     }
 
     sourceSets["main"].java.srcDir("src/main/kotlin")
+    sourceSets["test"].java.srcDir("test/kotlin")
 
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
@@ -23,10 +23,25 @@ android {
     kotlinOptions {
         jvmTarget = "17"
     }
+
 }
 
 dependencies {
     implementation(projects.caliperAnnotation)
     implementation(projects.caliperRuntime)
     ksp(projects.caliperAnnotationProcessor)
+
+    testImplementation(deps.junit4)
+    testApi("com.bennyhuo.kotlin:code-analyzer:1.1")
+    testApi("io.gitlab.arturbosch.detekt:detekt-core:1.20.0")
+    testApi("io.gitlab.arturbosch.detekt:detekt-tooling:1.20.0")
+    testApi("io.gitlab.arturbosch.detekt:detekt-parser:1.20.0")
+    testApi("io.gitlab.arturbosch.detekt:detekt-utils:1.20.0")
 }
+
+tasks.withType<Test> {
+    testLogging {
+        this.showStandardStreams = true
+    }
+}
+

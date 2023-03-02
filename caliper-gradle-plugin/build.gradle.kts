@@ -1,6 +1,5 @@
 plugins {
     `kotlin-dsl`
-//    id("org.gradle.kotlin.kotlin-dsl") version "4.0.7"
 
     id("org.jetbrains.kotlin.plugin.serialization") version "1.8.10"
     id("java-gradle-plugin")
@@ -22,6 +21,10 @@ dependencies {
     implementation(deps.asm.util)
     implementation(deps.kotlin.serialization)
     implementation(deps.ksp.gradle.plugin)
+
+    // kotlin compiler & static analytics
+    implementation(projects.codeAnalyzer)
+    implementation(deps.apache.common.text)
 
     // Tests
     testImplementation(deps.hamcrest)

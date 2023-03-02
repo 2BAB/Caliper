@@ -19,7 +19,7 @@ class CaliperMethodVisitor(
     private var isNewOperationCodeFound = false
 
     override fun visitTypeInsn(opcode: Int, type: String?) {
-        logger.info(
+        logger.debug(
             "[CaliperMethodVisitor] visitTypeInsn class = $className , opcode = $opcode,"
         )
         val classProxies = proxyConfig.proxiedClasses
@@ -35,7 +35,7 @@ class CaliperMethodVisitor(
 
 
     override fun visitFieldInsn(opcode: Int, owner: String?, name: String?, descriptor: String?) {
-        logger.info(
+        logger.debug(
             "[CaliperMethodVisitor] visitFieldInsn class = $className , opcode = $opcode, owner = $owner," +
                     " name = $name, descriptor = $descriptor"
         )
@@ -47,7 +47,7 @@ class CaliperMethodVisitor(
                 && descriptor != null // All sensitive data should have at least an output of the API call.
                 && className.contains(CALIPER_PACKAGE_FOR_WRAPPER_SPLIT_BY_SLASH).not()
             ) {
-                logger.info("[CaliperMethodVisitor] visitFieldInsn matched.")
+                logger.debug("[CaliperMethodVisitor] visitFieldInsn matched.")
                 if (opcode == ASMOpcodes.GETSTATIC) {
                     visitMethodInsn(
                         opcode = INVOKESTATIC,
@@ -80,7 +80,7 @@ class CaliperMethodVisitor(
         descriptor: String?,
         isInterface: Boolean
     ) {
-        logger.info(
+        logger.debug(
             "[CaliperMethodVisitor] visitMethodInsn class = $className, opcode = $opcode, owner = $owner," +
                     " methodName = $methodName, descriptor = $descriptor"
         )
@@ -114,7 +114,7 @@ class CaliperMethodVisitor(
                 && descriptor != null // All sensitive data should have at least the output of an API call.
                 && className.contains(CALIPER_PACKAGE_FOR_WRAPPER_SPLIT_BY_SLASH).not()
             ) {
-                logger.info("[CaliperMethodVisitor] visitMethodInsn matched.")
+                logger.debug("[CaliperMethodVisitor] visitMethodInsn matched.")
                 if (opcode == ASMOpcodes.INVOKESTATIC) {
                     visitMethodInsn(
                         opcode = INVOKESTATIC,

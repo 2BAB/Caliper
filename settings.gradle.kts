@@ -24,6 +24,7 @@ dependencyResolutionManagement {
     repositories {
         mavenCentral()
         google()
+        maven("https://oss.sonatype.org/content/repositories/snapshots/") // only for detekt snapshot so far
     }
     versionCatalogs {
         create("deps") {
@@ -39,6 +40,7 @@ include(
     ":caliper-annotation-processor",
 
     ":caliper-gradle-plugin",
+    ":code-analyzer",
     ":gradle-instrumented-kit",
 
     ":caliper-runtime",

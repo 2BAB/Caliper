@@ -14,11 +14,14 @@ import me.xx2bab.caliper.common.Constants
 import me.xx2bab.caliper.common.ProxiedClass
 import me.xx2bab.caliper.common.ProxiedField
 import me.xx2bab.caliper.common.ProxiedMethod
+import me.xx2bab.caliper.common.toCaliperWrapperFullNameBySlash
+import me.xx2bab.caliper.common.toCaliperWrapperSimpleName
 import org.apache.commons.text.StringEscapeUtils
 import kotlin.text.StringBuilder
 import javax.lang.model.element.Modifier
 
 class CaliperWrapperGenerator(
+    private val moduleName: String,
     private val metadataMap: Map<String, ProxyMetaData>,
     private val codeGenerator: CodeGenerator,
     private val logger: KSPLoggerWrapper
@@ -27,9 +30,9 @@ class CaliperWrapperGenerator(
     fun generate() {
         val proxiedMetaData = ProxiedMetaData()
         metadataMap.forEach { (className, metadata) ->
-            val wrapperSimpleClassName = className.split(".").last().toCaliperWrapperName()
-            val wrapperFullClassNameBySlash =
-                Constants.CALIPER_PACKAGE_FOR_WRAPPER_SPLIT_BY_SLASH + "/" + wrapperSimpleClassName
+            val simpleClassName = className.split(".").last()
+            val wrapperSimpleClassName = simpleClassName.toCaliperWrapperSimpleName()
+            val wrapperFullClassNameBySlash = simpleClassName.toCaliperWrapperFullNameBySlash()
 
             if (metadata.targetClass != null) {
                 proxiedMetaData.proxiedClasses.add(
@@ -66,7 +69,8 @@ class CaliperWrapperGenerator(
                 fileOutputStream.close()
             } else {
                 val methodSpecs = metadata.methods.map { proxyMethod ->
-                    val isAnnotatedWithProxyMethod = proxyMethod.targetType == CaliperMethodProxy::class.simpleName
+                    val isAnnotatedWithProxyMethod =
+                        proxyMethod.targetType == CaliperMethodProxy::class.simpleName
                     if (isAnnotatedWithProxyMethod) {
                         val pm = ProxiedMethod(
                             className = proxyMethod.targetClassName,
@@ -94,7 +98,8 @@ class CaliperWrapperGenerator(
                     val invokeParams = proxyMethod.params.joinToString(",") { it.paramName }
                     logger.lifecycle(proxyMethod.targetClassName)
                     MethodSpec.methodBuilder(proxyMethod.methodName).returns(proxyMethod.returnType)
-                        .addModifiers(Modifier.PUBLIC, Modifier.STATIC).addParameters(inputParams).addStatement(
+                        .addModifiers(Modifier.PUBLIC, Modifier.STATIC).addParameters(inputParams)
+                        .addStatement(
                             "// Caliper.visitMethod(\""
                                     + proxyMethod.targetClassName.replace(
                                 "$",
@@ -109,7 +114,11 @@ class CaliperWrapperGenerator(
                 val annotationSpec = AnnotationSpec.builder(CaliperMeta::class.java)
                     .addMember(
                         "metadataInJSON",
-                        "\"${StringEscapeUtils.escapeJava(Json.encodeToString(proxiedMetaData).replace("$", "$$"))}\""
+                        "\"${
+                            StringEscapeUtils.escapeJava(
+                                Json.encodeToString(proxiedMetaData).replace("$", "$$")
+                            )
+                        }\""
                     )
                     .build()
 
@@ -144,13 +153,11 @@ class CaliperWrapperGenerator(
         val jsonFileOutputStream = codeGenerator.createNewFile(
             dependencies = Dependencies(true, *proxiedMetaData.mapKSFiles.toTypedArray()),
             packageName = "",
-            fileName = "aggregation.caliper",
+            fileName = "${moduleName.lowercase()}.caliper",
             extensionName = "json"
         )
         jsonFileOutputStream.write(json.toByteArray())
         jsonFileOutputStream.close()
     }
-
-    private fun String.toCaliperWrapperName() = this + "_CaliperWrapper"
 
 }

@@ -7,6 +7,7 @@ interface KLogger {
     fun info(message: String)
     fun warn(message: String)
     fun error(message: String)
+    fun debug(message: String)
 }
 
 class GradleKLogger(private val logger: Logger) : KLogger {
@@ -25,6 +26,10 @@ class GradleKLogger(private val logger: Logger) : KLogger {
     override fun error(message: String) {
         logger.error("[Caliper][Error]: $message")
     }
+
+    override fun debug(message: String) {
+        logger.debug("[Caliper][Debug]: $message")
+    }
 }
 
 class DefaultKotlinLogger : KLogger {
@@ -42,5 +47,9 @@ class DefaultKotlinLogger : KLogger {
 
     override fun error(message: String) {
         println("[Caliper][Error]: $message")
+    }
+
+    override fun debug(message: String) {
+        println("[Caliper][Debug]: $message")
     }
 }

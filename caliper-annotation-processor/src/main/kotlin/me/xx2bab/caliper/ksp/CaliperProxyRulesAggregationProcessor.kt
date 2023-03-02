@@ -9,6 +9,7 @@ import com.squareup.kotlinpoet.ksp.toTypeName
 import me.xx2bab.caliper.anno.*
 import kotlin.collections.getOrPut
 import me.xx2bab.caliper.common.Constants.KSP_OPTION_ANDROID_APP
+import me.xx2bab.caliper.common.Constants.KSP_OPTION_MODULE_NAME
 import java.util.concurrent.atomic.AtomicBoolean
 
 class CaliperProxyRulesAggregationProcessorProvider : SymbolProcessorProvider {
@@ -17,9 +18,10 @@ class CaliperProxyRulesAggregationProcessorProvider : SymbolProcessorProvider {
     ): SymbolProcessor {
         val logger = KSPLoggerWrapper(env.logger)
         val isAndroidAppModule = env.options[KSP_OPTION_ANDROID_APP].toBoolean()
+        val moduleName = env.options[KSP_OPTION_MODULE_NAME].toString()
         logger.info("isAndroidAppModule: $isAndroidAppModule")
         return CaliperProxyRulesAggregationProcessor(
-            isAndroidAppModule, env.codeGenerator, logger
+            isAndroidAppModule, moduleName, env.codeGenerator, logger
         )
     }
 }
@@ -29,6 +31,7 @@ class CaliperProxyRulesAggregationProcessorProvider : SymbolProcessorProvider {
  */
 class CaliperProxyRulesAggregationProcessor(
     private val isAndroidAppModule: Boolean,
+    private val moduleName: String,
     private val codeGenerator: CodeGenerator,
     private val logger: KSPLoggerWrapper,
 ) : SymbolProcessor {
@@ -69,7 +72,7 @@ class CaliperProxyRulesAggregationProcessor(
         super.finish()
         logger.info("finish")
         logger.info("current metadataMap size: ${metadataMap.size}")
-        val generator = CaliperWrapperGenerator(metadataMap, codeGenerator, logger)
+        val generator = CaliperWrapperGenerator(moduleName, metadataMap, codeGenerator, logger)
         generator.generate()
     }
 

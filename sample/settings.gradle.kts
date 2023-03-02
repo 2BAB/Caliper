@@ -27,6 +27,7 @@ pluginManagement {
         mavenCentral()
         google()
         gradlePluginPortal()
+        maven("https://oss.sonatype.org/content/repositories/snapshots/") // only for detekt snapshot so far
     }
 }
 

@@ -19,7 +19,7 @@ class CaliperClassVisitor(
     private var tempClassName = ""
 
     init {
-        logger.info("[CaliperClassVisitor] init")
+        logger.debug("[CaliperClassVisitor] init")
     }
 
     override fun visit(
@@ -31,7 +31,7 @@ class CaliperClassVisitor(
         interfaces: Array<out String>?
     ) {
         super.visit(version, access, name, signature, superName, interfaces)
-        logger.info("visit class $name")
+        logger.debug("visit class $name")
         tempClassName = name ?: ""
     }
 
@@ -42,7 +42,7 @@ class CaliperClassVisitor(
         signature: String?,
         exceptions: Array<out String>?
     ): MethodVisitor {
-        logger.info("visitMethod $methodName")
+        logger.debug("visitMethod $methodName")
         val sv = super.visitMethod(access, methodName, descriptor, signature, exceptions)
         return CaliperMethodVisitor(
             access, descriptor, signature, sv, tempClassName, methodName, config, logger

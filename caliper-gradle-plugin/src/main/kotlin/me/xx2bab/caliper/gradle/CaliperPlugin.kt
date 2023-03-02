@@ -1,28 +1,18 @@
 package me.xx2bab.caliper.gradle
 
-import com.android.build.api.attributes.AgpVersionAttr
 import com.android.build.api.attributes.BuildTypeAttr
 import com.android.build.api.instrumentation.FramesComputationMode
 import com.android.build.api.instrumentation.InstrumentationScope
 import com.android.build.api.variant.ApplicationAndroidComponentsExtension
 import com.android.build.gradle.AppPlugin
 import com.android.build.gradle.LibraryPlugin
-import com.android.build.gradle.internal.attributes.VariantAttr
-import com.android.build.gradle.internal.publishing.AndroidArtifacts
-import com.android.build.gradle.internal.tasks.DexMergingTask
-import com.android.build.gradle.tasks.TransformClassesWithAsmTask
-import com.github.javaparser.printer.concretesyntaxmodel.CsmElement
-import com.github.javaparser.printer.concretesyntaxmodel.CsmElement.attribute
 import com.google.devtools.ksp.gradle.KspExtension
 import me.xx2bab.caliper.common.Constants
-import me.xx2bab.caliper.common.Constants.CALIPER_AGGREGATE_METADATA_FILE_NAME
 import me.xx2bab.caliper.gradle.build.BuildConfig
 import me.xx2bab.caliper.gradle.core.GradleKLogger
-import org.gradle.api.Action
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.attributes.*
-import org.gradle.api.specs.Spec
 import org.gradle.api.tasks.CacheableTask
 import org.gradle.configurationcache.extensions.capitalized
 import org.gradle.kotlin.dsl.getByType
@@ -60,19 +50,20 @@ abstract class CaliperPlugin : Plugin<Project> {
             add("ksp", annotationProcessorDep.format(BuildConfig.CALIPER_VERSION))
         }
 
-        val caliperConfiguration =
-            project.configurations.maybeCreate("caliper").apply {
-                description =
-                    "Used by Caliper Gradle Plugin to gather metadata for bytecode transform.."
-                isCanBeConsumed = true
-            }
-        project.configurations.getByName("implementation")
-            .extendsFrom(caliperConfiguration)
 
         // `withType<>{}` is null-safe, makes sure if the AppPlugin is not found,
         // the plugin doesn't go through the rest procedure.
         project.plugins.withType<AppPlugin> {
             androidAppOrLibPluginApplied.set(true)
+
+            val caliperConfiguration =
+                project.configurations.maybeCreate("caliper").apply {
+                    description =
+                        "Used by Caliper Gradle Plugin to gather metadata for bytecode transform.."
+                    isCanBeConsumed = true
+                }
+            project.configurations.getByName("implementation")
+                .extendsFrom(caliperConfiguration)
 
             // Mark the current module as an Android Application module
             // to activate meta data aggregation mode.
@@ -110,12 +101,20 @@ abstract class CaliperPlugin : Plugin<Project> {
                         }
                     }
 
+                val proxyConfigCollector = project.gradle
+                    .sharedServices
+                    .registerIfAbsent(
+                        "CaliperProxyConfigCollectorFor${capVariantName}",
+                        CaliperProxyConfigCollectorService::class.java
+                    ) {}
+
                 appVariant.instrumentation
                     .transformClassesWith(
                         CaliperClassVisitorFactory::class.java,
                         InstrumentationScope.ALL
                     ) {
                         it.variantCaliperConfiguration.from(variantCaliperConfiguration)
+                        it.collectorServiceProp.set(proxyConfigCollector)
                     }
                 appVariant.instrumentation
                     .setAsmFramesComputationMode(FramesComputationMode.COPY_FRAMES)
