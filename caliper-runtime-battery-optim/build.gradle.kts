@@ -28,3 +28,8 @@ dependencies {
     implementation(projects.caliperRuntime)
     ksp(projects.caliperAnnotationProcessor)
 }
+
+ksp {
+    arg("ANDROID_APPLICATION_MODULE", "false")
+    arg("MODULE_NAME", "caliper-runtime-battery-optim")
+}

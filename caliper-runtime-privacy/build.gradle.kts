@@ -45,3 +45,4 @@ tasks.withType<Test> {
     }
 }
 
+ksp {    arg("ANDROID_APPLICATION_MODULE", "false")    arg("MODULE_NAME", "caliper-runtime-privacy")}

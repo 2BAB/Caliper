@@ -65,11 +65,6 @@ abstract class CaliperPlugin : Plugin<Project> {
             project.configurations.getByName("implementation")
                 .extendsFrom(caliperConfiguration)
 
-            // Mark the current module as an Android Application module
-            // to activate meta data aggregation mode.
-            project.extensions.getByType<KspExtension>()
-                .arg(Constants.KSP_OPTION_ANDROID_APP, "true")
-
             val androidExtension =
                 project.extensions.getByType(ApplicationAndroidComponentsExtension::class.java)
             androidExtension.onVariants { appVariant ->
@@ -137,7 +132,15 @@ abstract class CaliperPlugin : Plugin<Project> {
 
         project.plugins.withType<LibraryPlugin> {
             androidAppOrLibPluginApplied.set(true)
+
+            // Mark the current module as an Android Application module
+            // to activate meta data aggregation mode.
+            project.extensions.getByType<KspExtension>().apply {
+                arg(Constants.KSP_OPTION_ANDROID_APP, "false")
+                arg(Constants.KSP_OPTION_MODULE_NAME, project.name)
+            }
         }
+
     }
 
 

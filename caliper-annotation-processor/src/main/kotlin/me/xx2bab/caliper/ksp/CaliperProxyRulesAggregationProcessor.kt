@@ -20,6 +20,7 @@ class CaliperProxyRulesAggregationProcessorProvider : SymbolProcessorProvider {
         val isAndroidAppModule = env.options[KSP_OPTION_ANDROID_APP].toBoolean()
         val moduleName = env.options[KSP_OPTION_MODULE_NAME].toString()
         logger.info("isAndroidAppModule: $isAndroidAppModule")
+        logger.info("moduleName: $moduleName")
         return CaliperProxyRulesAggregationProcessor(
             isAndroidAppModule, moduleName, env.codeGenerator, logger
         )

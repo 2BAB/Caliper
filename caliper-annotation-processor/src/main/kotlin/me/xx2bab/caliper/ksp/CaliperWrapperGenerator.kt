@@ -41,12 +41,6 @@ class CaliperWrapperGenerator(
                         replacedClassName = className.replace(".", "/")
                     )
                 )
-//                val annotationSpec = AnnotationSpec.builder(CaliperMeta::class.java)
-//                    .addMember(
-//                        "metadataInJSON",
-//                        "\"${StringEscapeUtils.escapeJava(Json.encodeToString(proxiedMetaData).replace("$", "$$"))}\""
-//                    )
-//                    .build()
 
                 val classType =
                     TypeSpec.classBuilder(wrapperSimpleClassName)
@@ -111,21 +105,9 @@ class CaliperWrapperGenerator(
                         .build()
                 }
 
-                val annotationSpec = AnnotationSpec.builder(CaliperMeta::class.java)
-                    .addMember(
-                        "metadataInJSON",
-                        "\"${
-                            StringEscapeUtils.escapeJava(
-                                Json.encodeToString(proxiedMetaData).replace("$", "$$")
-                            )
-                        }\""
-                    )
-                    .build()
-
                 val classType =
                     TypeSpec.classBuilder(wrapperSimpleClassName)
                         .addModifiers(Modifier.PUBLIC, Modifier.FINAL)
-                        .addAnnotation(annotationSpec)
                         .addMethods(methodSpecs).build()
                 val javaFile = JavaFile.builder(Constants.CALIPER_PACKAGE_FOR_WRAPPER, classType)
                     .indent("    ")
