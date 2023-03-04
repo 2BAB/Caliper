@@ -4,6 +4,7 @@ import io.github.detekt.tooling.api.spec.ProcessingSpec
 import io.github.detekt.tooling.dsl.ProcessingSpecBuilder
 import org.jetbrains.kotlin.js.inline.util.replaceThisReference
 import java.io.File
+import java.io.PrintStream
 import java.lang.StringBuilder
 
 /**
@@ -18,20 +19,7 @@ class Options {
     var basePath: String? = null
     var inputPaths: Collection<String> = emptyList()
     var debug: Boolean = false
-
-    val clearAppendable = object : Appendable {
-        override fun append(csq: CharSequence?): java.lang.Appendable {
-            return this
-        }
-
-        override fun append(csq: CharSequence?, start: Int, end: Int): java.lang.Appendable {
-            return this
-        }
-
-        override fun append(c: Char): java.lang.Appendable {
-            return this
-        }
-    }
+    var logger: Appendable = System.out
 
     internal fun toProcessingSpec(): ProcessingSpec {
         return ProcessingSpecBuilder().apply {
@@ -44,8 +32,8 @@ class Options {
 
             logging {
                 debug = this@Options.debug
-                outputChannel = clearAppendable
-                errorChannel = clearAppendable
+                outputChannel = logger
+                errorChannel = logger
             }
 
             compiler {

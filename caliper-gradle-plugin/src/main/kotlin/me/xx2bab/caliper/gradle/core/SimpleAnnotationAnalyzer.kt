@@ -12,6 +12,23 @@ import org.jetbrains.kotlin.resolve.calls.util.getResolvedCall
 
 class SimpleAnnotationAnalyzer(private val logger: KLogger) {
 
+    private val appendableLogger = object: Appendable {
+        override fun append(csq: CharSequence?): java.lang.Appendable {
+            logger.debug(csq.toString())
+            return this
+        }
+
+        override fun append(csq: CharSequence?, start: Int, end: Int): java.lang.Appendable {
+            logger.debug(csq.toString())
+            return this
+        }
+
+        override fun append(c: Char): java.lang.Appendable {
+            logger.debug(c.toString())
+            return this
+        }
+    }
+
     fun analyze(
         sources: List<String>,
         visitor: Visitor
@@ -20,6 +37,7 @@ class SimpleAnnotationAnalyzer(private val logger: KLogger) {
         val result = KotlinCodeAnalyzer(buildOptions {
             inputPaths = sources
             inheritClassPath = false
+            logger = appendableLogger
         }).analyze()
         logger.info("SimpleAnnotationAnalyzer processed: ${result.files}")
         result.files.forEach {

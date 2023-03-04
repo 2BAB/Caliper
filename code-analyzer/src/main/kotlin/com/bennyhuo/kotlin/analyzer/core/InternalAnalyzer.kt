@@ -27,7 +27,8 @@ internal class InternalAnalyzer(
         files: List<KtFile>,
     ): AnalysisResult {
         val analyzer = AnalyzerWithCompilerReport(
-            CodeAnalyzerMessageCollector(minSeverity = CompilerMessageSeverity.ERROR),
+            AppendableMessageCollector(appendable = settings.outputChannel,
+                minSeverity = CompilerMessageSeverity.ERROR),
             environment.configuration.languageVersionSettings,
             true
         )
