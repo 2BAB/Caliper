@@ -10,7 +10,6 @@ dependencies {
     val detektVer = "main-SNAPSHOT"
     implementation("io.gitlab.arturbosch.detekt:detekt-core:$detektVer")
     implementation("io.gitlab.arturbosch.detekt:detekt-tooling:$detektVer")
-    implementation("io.gitlab.arturbosch.detekt:detekt-parser:$detektVer")
     implementation("io.gitlab.arturbosch.detekt:detekt-utils:$detektVer")
     api("org.jetbrains.kotlin:kotlin-compiler-embeddable:1.8.10")
 
