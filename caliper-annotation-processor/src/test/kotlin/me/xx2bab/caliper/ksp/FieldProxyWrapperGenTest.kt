@@ -4,6 +4,7 @@ import com.tschuchort.compiletesting.*
 import me.xx2bab.caliper.anno.ASMOpcodes
 import me.xx2bab.caliper.common.Constants
 import me.xx2bab.caliper.common.Constants.KSP_OPTION_ANDROID_APP
+import me.xx2bab.caliper.common.Constants.KSP_OPTION_MODULE_NAME
 import org.hamcrest.MatcherAssert.assertThat
 import org.hamcrest.Matchers
 import org.hamcrest.text.IsEqualCompressingWhiteSpace.equalToCompressingWhiteSpace
@@ -15,10 +16,10 @@ class FieldProxyWrapperGenTest {
     @Test
     fun `Test Java file generation`() {
         val proxyWrittenInJava = SourceFile.java(
-            "ProxyWrittenInJavaForFieldProxy.java", """
+            "ProxyWrittenInJavaForFieldReplacement.java", """
                 package me.xx2bab.caliper.test;
                 import me.xx2bab.caliper.anno.CaliperFieldProxy;
-                public class ProxyWrittenInJavaForFieldProxy {            
+                public class ProxyWrittenInJavaForFieldReplacement {            
                     @CaliperFieldProxy(
                         className = "android/provider/Settings${'$'}Secure",
                         fieldName = "SERIAL",
@@ -38,7 +39,10 @@ class FieldProxyWrapperGenTest {
             // KSP
             kspWithCompilation = true
             symbolProcessorProviders = listOf(CaliperProxyRulesAggregationProcessorProvider())
-            kspArgs = mutableMapOf<String, String>(KSP_OPTION_ANDROID_APP to "true")
+            kspArgs = mutableMapOf<String, String>(
+                KSP_OPTION_ANDROID_APP to "true",
+                KSP_OPTION_MODULE_NAME to "app"
+            )
         }.compile()
         assertThat(result.exitCode, Matchers.`is`(KotlinCompilation.ExitCode.OK))
 
@@ -46,15 +50,26 @@ class FieldProxyWrapperGenTest {
 
         val generatedClass = File(
             kspGenDir,
-            "java/${Constants.CALIPER_PACKAGE_FOR_WRAPPER_SPLIT_BY_SLASH.replace(".", "/")}/ProxyWrittenInJavaForFieldProxy_CaliperWrapper.java"
+            "java/${
+                Constants.CALIPER_PACKAGE_FOR_WRAPPER_SPLIT_BY_SLASH.replace(
+                    ".",
+                    "/"
+                )
+            }/ProxyWrittenInJavaForFieldReplacement_CaliperWrapper.java"
         ).readText()
-
-        val expectContent = File("src/test/resources/ProxyWrittenInJavaForFieldProxy_CaliperWrapper.java").readText()
-
+        val expectContent =
+            File("src/test/resources/ProxyWrittenInJavaForFieldReplacement_CaliperWrapper.java").readText()
         assertThat(
             expectContent,
             equalToCompressingWhiteSpace(generatedClass)
         )
+
+        val generatedJson = File(
+            kspGenDir,
+            "resources/app.caliper.json"
+        ).readText()
+        val expectJson = File("src/test/resources/field.caliper.json").readText()
+        assertThat(expectJson, equalToCompressingWhiteSpace(generatedJson))
     }
 
     @Test
@@ -63,7 +78,7 @@ class FieldProxyWrapperGenTest {
             "ProxyWrittenInKtForFieldProxy.kt", """
         package me.xx2bab.caliper.test;
         import me.xx2bab.caliper.anno.CaliperFieldProxy 
-        object ProxyWrittenInKtForFieldProxy {
+        object ProxyWrittenInKtForFieldReplacement {
             @CaliperFieldProxy(
                 className = "android/provider/Settings\${'$'}Secure",
                 fieldName = "SERIAL",
@@ -85,7 +100,10 @@ class FieldProxyWrapperGenTest {
             // KSP
             kspWithCompilation = true
             symbolProcessorProviders = listOf(CaliperProxyRulesAggregationProcessorProvider())
-            kspArgs = mutableMapOf<String, String>(KSP_OPTION_ANDROID_APP to "true")
+            kspArgs = mutableMapOf<String, String>(
+                KSP_OPTION_ANDROID_APP to "true",
+                KSP_OPTION_MODULE_NAME to "app"
+            )
         }.compile()
         assertThat(result.exitCode, Matchers.`is`(KotlinCompilation.ExitCode.OK))
 
@@ -93,15 +111,26 @@ class FieldProxyWrapperGenTest {
 
         val generatedClass = File(
             kspGenDir,
-            "java/${Constants.CALIPER_PACKAGE_FOR_WRAPPER_SPLIT_BY_SLASH.replace(".", "/")}/ProxyWrittenInKtForFieldProxy_CaliperWrapper.java"
+            "java/${
+                Constants.CALIPER_PACKAGE_FOR_WRAPPER_SPLIT_BY_SLASH.replace(
+                    ".",
+                    "/"
+                )
+            }/ProxyWrittenInKtForFieldReplacement_CaliperWrapper.java"
         ).readText()
-
-        val expectContent = File("src/test/resources/ProxyWrittenInKtForFieldProxy_CaliperWrapper.java").readText()
-
+        val expectContent =
+            File("src/test/resources/ProxyWrittenInKtForFieldReplacement_CaliperWrapper.java").readText()
         assertThat(
             expectContent,
             equalToCompressingWhiteSpace(generatedClass)
         )
+
+        val generatedJson = File(
+            kspGenDir,
+            "resources/app.caliper.json"
+        ).readText()
+        val expectJson = File("src/test/resources/field-kt.caliper.json").readText()
+        assertThat(expectJson, equalToCompressingWhiteSpace(generatedJson))
     }
 
 }

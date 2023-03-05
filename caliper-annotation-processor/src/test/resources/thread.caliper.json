@@ -1,0 +1,1 @@
+{"proxiedMethods":[],"proxiedFields":[],"proxiedClasses":[{"className":"java.lang.Thread","replacedClassName":"me/xx2bab/caliper/test/ThreadClassProxyWrittenInJava"}]}

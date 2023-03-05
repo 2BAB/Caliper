@@ -3,7 +3,6 @@ package me.xx2bab.caliper.ksp
 import com.tschuchort.compiletesting.*
 import me.xx2bab.caliper.anno.ASMOpcodes
 import me.xx2bab.caliper.common.Constants
-import org.hamcrest.MatcherAssert
 import org.hamcrest.MatcherAssert.assertThat
 import org.hamcrest.Matchers
 import org.hamcrest.text.IsEqualCompressingWhiteSpace.equalToCompressingWhiteSpace
@@ -15,10 +14,10 @@ class MethodProxyWrapperGenTest {
     @Test
     fun `Test Java file generation`() {
         val proxyWrittenInJava = SourceFile.java(
-            "ProxyWrittenInJavaForMethodProxy.java", """
+            "ProxyWrittenInJavaForMethodReplacement.java", """
                 package me.xx2bab.caliper.test;
                 import me.xx2bab.caliper.anno.CaliperMethodProxy;
-                public class ProxyWrittenInJavaForMethodProxy {            
+                public class ProxyWrittenInJavaForMethodReplacement {            
                     @CaliperMethodProxy(
                         className = "android/provider/Settings${'$'}Secure",
                         methodName = "getString",
@@ -38,32 +37,45 @@ class MethodProxyWrapperGenTest {
             // KSP
             kspWithCompilation = true
             symbolProcessorProviders = listOf(CaliperProxyRulesAggregationProcessorProvider())
-            kspArgs = mutableMapOf<String, String>(Constants.KSP_OPTION_ANDROID_APP to "true")
+            kspArgs = mutableMapOf<String, String>(
+                Constants.KSP_OPTION_ANDROID_APP to "true",
+                Constants.KSP_OPTION_MODULE_NAME to "app"
+            )
         }.compile()
         assertThat(result.exitCode, Matchers.`is`(KotlinCompilation.ExitCode.OK))
 
         val kspGenDir = compilationTool.kspSourcesDir
-
         val generatedClass = File(
             kspGenDir,
-            "java/${Constants.CALIPER_PACKAGE_FOR_WRAPPER_SPLIT_BY_SLASH.replace(".", "/")}/ProxyWrittenInJavaForMethodProxy_CaliperWrapper.java"
+            "java/${
+                Constants.CALIPER_PACKAGE_FOR_WRAPPER_SPLIT_BY_SLASH.replace(
+                    ".",
+                    "/"
+                )
+            }/ProxyWrittenInJavaForMethodReplacement_CaliperWrapper.java"
         ).readText()
-
-        val expectContent = File("src/test/resources/ProxyWrittenInJavaForMethodProxy_CaliperWrapper.java").readText()
-
+        val expectClassContent =
+            File("src/test/resources/ProxyWrittenInJavaForMethodReplacement_CaliperWrapper.java").readText()
         assertThat(
-            expectContent,
+            expectClassContent,
             equalToCompressingWhiteSpace(generatedClass)
         )
+
+        val generatedJson = File(
+            kspGenDir,
+            "resources/app.caliper.json"
+        ).readText()
+        val expectJson = File("src/test/resources/method.caliper.json").readText()
+        assertThat(expectJson, equalToCompressingWhiteSpace(generatedJson))
     }
 
     @Test
     fun `Test Kotlin file generation`() {
         val proxyWrittenInKt = SourceFile.kotlin(
-            "ProxyWrittenInKtForMethodProxy.kt", """
+            "ProxyWrittenInKtForMethodReplacement.kt", """
         package me.xx2bab.caliper.test;
         import me.xx2bab.caliper.anno.CaliperMethodProxy 
-        object ProxyWrittenInKtForMethodProxy {
+        object ProxyWrittenInKtForMethodReplacement {
             @CaliperMethodProxy(
                 className = "android/provider/Settings\${'$'}Secure",
                 methodName = "getString",
@@ -85,7 +97,10 @@ class MethodProxyWrapperGenTest {
             // KSP
             kspWithCompilation = true
             symbolProcessorProviders = listOf(CaliperProxyRulesAggregationProcessorProvider())
-            kspArgs = mutableMapOf<String, String>(Constants.KSP_OPTION_ANDROID_APP to "true")
+            kspArgs = mutableMapOf<String, String>(
+                Constants.KSP_OPTION_ANDROID_APP to "true",
+                Constants.KSP_OPTION_MODULE_NAME to "app"
+            )
         }.compile()
         assertThat(result.exitCode, Matchers.`is`(KotlinCompilation.ExitCode.OK))
 
@@ -93,15 +108,26 @@ class MethodProxyWrapperGenTest {
 
         val generatedClass = File(
             kspGenDir,
-            "java/${Constants.CALIPER_PACKAGE_FOR_WRAPPER_SPLIT_BY_SLASH.replace(".", "/")}/ProxyWrittenInKtForMethodProxy_CaliperWrapper.java"
+            "java/${
+                Constants.CALIPER_PACKAGE_FOR_WRAPPER_SPLIT_BY_SLASH.replace(
+                    ".",
+                    "/"
+                )
+            }/ProxyWrittenInKtForMethodReplacement_CaliperWrapper.java"
         ).readText()
-
-        val expectContent = File("src/test/resources/ProxyWrittenInKtForMethodProxy_CaliperWrapper.java").readText()
-
+        val expectContent =
+            File("src/test/resources/ProxyWrittenInKtForMethodReplacement_CaliperWrapper.java").readText()
         assertThat(
             expectContent,
             equalToCompressingWhiteSpace(generatedClass)
         )
+
+        val generatedJson = File(
+            kspGenDir,
+            "resources/app.caliper.json"
+        ).readText()
+        val expectJson = File("src/test/resources/method-kt.caliper.json").readText()
+        assertThat(expectJson, equalToCompressingWhiteSpace(generatedJson))
     }
 
 }
