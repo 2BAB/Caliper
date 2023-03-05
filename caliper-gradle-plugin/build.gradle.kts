@@ -36,8 +36,11 @@ dependencies {
 }
 
 // To include the AGP and other testImplementation deps into classpath.
+val testCompileTask = project.tasks.getByName("compileTestKotlin")
 tasks.withType<PluginUnderTestMetadata>().configureEach {
     pluginClasspath.from(provider { sourceSets.test.get().runtimeClasspath.files })
+    dependsOn("processTestResources")
+    testCompileTask.dependsOn(this)
 }
 
 val deleteOldInstrumentedTests by tasks.registering(Delete::class) {
@@ -52,11 +55,14 @@ testing {
 
         val integrationTest by registering(JvmTestSuite::class) {
             dependencies {
+                implementation(project())
                 implementation(project(":gradle-instrumented-kit"))
             }
             targets {
                 all {
                     testTask.configure {
+                        dependsOn("compileTestKotlin")
+                        dependsOn("compileTestJava")
                         shouldRunAfter(test)
                         dependsOn(deleteOldInstrumentedTests)
                     }
@@ -72,6 +78,8 @@ testing {
             targets {
                 all {
                     testTask.configure {
+                        dependsOn("compileTestKotlin")
+                        dependsOn("compileTestJava")
                         shouldRunAfter(test)
                         dependsOn(deleteOldInstrumentedTests)
                     }

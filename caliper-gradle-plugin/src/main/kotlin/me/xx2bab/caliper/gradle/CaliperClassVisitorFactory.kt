@@ -40,10 +40,10 @@ abstract class CaliperClassVisitorFactory :
     }
 
     override fun isInstrumentable(classData: ClassData): Boolean {
-//        return false
+        return true
 //        return classData.className.startsWith("me.xx2bab.caliper.sample.MainActivity")
-        return (classData.className.startsWith("me.xx2bab.caliper.runtime")
-                || classData.className.startsWith("me.xx2bab.caliper.sample.customproxy")).not()
+//        return (classData.className.startsWith("me.xx2bab.caliper.runtime")
+//                || classData.className.startsWith("me.xx2bab.caliper.sample.customproxy")).not()
     }
 
 }

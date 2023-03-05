@@ -5,14 +5,16 @@ import io.mockk.verify
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
+import org.robolectric.annotation.Config
 
 @RunWith(RobolectricTestRunner::class)
+@Config(sdk = [28])
 class CaliperLoggerTest {
 
     private val androidLogger = spyk(DefaultAndroidLogger())
 
     @Test
-    fun abc() {
+    fun verifyLoggerPrintSuccessfully() {
         val logger = CaliperLogger(androidLogger)
         logger.visit(
             "className",
@@ -22,7 +24,7 @@ class CaliperLoggerTest {
         )
         verify { androidLogger.d(MAIN_TAG,
             "Proxy triggered: class \"className\" with element \"methodName\" :\n" +
-                "    --> process identifier: me.xx2bab.caliper.runtime.test\n" +
+                "    --> process identifier: me.xx2bab.caliper.runtime.core.test\n" +
                 "    --> thread: main thread\n" +
                 "    --> parameters: p1 = 1, p2 = [\"foo\", \"bar\"], ") }
     }

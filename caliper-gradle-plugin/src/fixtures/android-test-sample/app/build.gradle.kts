@@ -6,6 +6,7 @@ plugins {
 }
 android {
     compileSdk = 31
+    namespace = "me.xx2bab.sample"
     defaultConfig {
         applicationId = "me.xx2bab.sample"
         minSdk = 23
