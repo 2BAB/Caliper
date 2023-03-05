@@ -30,7 +30,7 @@ internal class InternalAnalyzer(
             AppendableMessageCollector(appendable = settings.outputChannel,
                 minSeverity = CompilerMessageSeverity.ERROR),
             environment.configuration.languageVersionSettings,
-            true
+             true
         )
         analyzer.analyzeAndReport(files) {
             TopDownAnalyzerFacadeForJVM.analyzeFilesWithJavaIntegration(

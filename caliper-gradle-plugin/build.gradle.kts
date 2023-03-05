@@ -1,7 +1,8 @@
 plugins {
-    `kotlin-dsl`
+//    `kotlin-dsl` // For 1.8.10
+    id("org.gradle.kotlin.kotlin-dsl") version "3.2.7" // For 1.7.22
 
-    id("org.jetbrains.kotlin.plugin.serialization") version "1.8.10"
+    alias(deps.plugins.kotlin.serialization)
     id("java-gradle-plugin")
     `github-release`
     alias(deps.plugins.build.config)
