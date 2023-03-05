@@ -2,7 +2,7 @@ package me.xx2bab.caliper.ksp
 
 import com.google.devtools.ksp.processing.CodeGenerator
 import com.google.devtools.ksp.processing.Dependencies
-import com.squareup.javapoet.AnnotationSpec
+import com.squareup.javapoet.ClassName
 import com.squareup.javapoet.JavaFile
 import com.squareup.javapoet.MethodSpec
 import com.squareup.javapoet.ParameterSpec
@@ -16,7 +16,6 @@ import me.xx2bab.caliper.common.ProxiedField
 import me.xx2bab.caliper.common.ProxiedMethod
 import me.xx2bab.caliper.common.toCaliperWrapperFullNameBySlash
 import me.xx2bab.caliper.common.toCaliperWrapperSimpleName
-import org.apache.commons.text.StringEscapeUtils
 import kotlin.text.StringBuilder
 import javax.lang.model.element.Modifier
 
@@ -42,9 +41,9 @@ class CaliperWrapperGenerator(
                     )
                 )
 
-                val classType =
+                /*val classType =
                     TypeSpec.classBuilder(wrapperSimpleClassName)
-                        .addModifiers(Modifier.PRIVATE, Modifier.FINAL)
+                        .addModifiers(Modifier.PUBLIC, Modifier.FINAL)
                         .build()
                 val javaFile = JavaFile.builder(Constants.CALIPER_PACKAGE_FOR_WRAPPER, classType)
                     .indent("    ")
@@ -58,9 +57,9 @@ class CaliperWrapperGenerator(
                 )
                 val sb = StringBuilder()
                 javaFile.writeTo(sb)
-                logger.lifecycle(sb.toString())
+                logger.info(sb.toString())
                 fileOutputStream.write(sb.toString().toByteArray())
-                fileOutputStream.close()
+                fileOutputStream.close()*/
             } else {
                 val methodSpecs = metadata.methods.map { proxyMethod ->
                     val isAnnotatedWithProxyMethod =
@@ -90,16 +89,31 @@ class CaliperWrapperGenerator(
                     }
 
                     val invokeParams = proxyMethod.params.joinToString(",") { it.paramName }
+                    val invokeParamsWithDoubleQuote =
+                        proxyMethod.params.joinToString(",") { "\"${it.paramName}\"" }
+                    val paramNameArray = if (invokeParamsWithDoubleQuote.isBlank()) {
+                        "new String[]{}"
+                    } else {
+                        "new String[]{${invokeParamsWithDoubleQuote}}"
+                    }
+                    val paramInstanceArray = if (invokeParamsWithDoubleQuote.isBlank()) {
+                        "new Object[]{}"
+                    } else {
+                        "new Object[]{${invokeParams}}"
+                    }
                     logger.lifecycle(proxyMethod.targetClassName)
+                    val caliperClass = ClassName.get("me.xx2bab.caliper.runtime", "Caliper")
                     MethodSpec.methodBuilder(proxyMethod.methodName).returns(proxyMethod.returnType)
                         .addModifiers(Modifier.PUBLIC, Modifier.STATIC).addParameters(inputParams)
                         .addStatement(
-                            "// Caliper.visitMethod(\""
+                            "\$T.log(\""
                                     + proxyMethod.targetClassName.replace(
                                 "$",
                                 "$$"
-                            ) // https://github.com/square/javapoet/issues/670
-                                    + "\",\"${proxyMethod.methodName}\"" + "${if (invokeParams.isBlank()) "" else ","}$invokeParams)"
+                            ) + "\", " // https://github.com/square/javapoet/issues/670
+                                    + "\"${proxyMethod.methodName}\", "
+                                    + "$paramNameArray, "
+                                    + "$paramInstanceArray)", caliperClass
                         )
                         .addStatement("return $className.${proxyMethod.methodName}($invokeParams)")
                         .build()
@@ -121,7 +135,7 @@ class CaliperWrapperGenerator(
                 )
                 val sb = StringBuilder()
                 javaFile.writeTo(sb)
-                logger.lifecycle(sb.toString())
+                logger.info(sb.toString())
                 fileOutputStream.write(sb.toString().toByteArray())
                 fileOutputStream.close()
             }
@@ -132,6 +146,7 @@ class CaliperWrapperGenerator(
         }
 
         val json = Json.encodeToString(proxiedMetaData)
+        logger.info(json)
         val jsonFileOutputStream = codeGenerator.createNewFile(
             dependencies = Dependencies(true, *proxiedMetaData.mapKSFiles.toTypedArray()),
             packageName = "",

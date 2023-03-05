@@ -8,8 +8,9 @@ public final class Caliper {
 
     public static void log(String className,
                     String elementName, // Method or Field name
-                    String[] parameterNames,
-                    Object[] parameterValues) {
+                    String[] parameterNames, // Nullable
+                    Object[] parameterValues // Nullable
+    ) {
         for (SignatureVisitor visitor : visitors) {
             visitor.visit(className, elementName, parameterNames, parameterValues);
         }
