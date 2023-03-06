@@ -4,6 +4,7 @@
 
 plugins {
     kotlin("jvm")
+    `maven-central-publish`
 }
 
 dependencies {

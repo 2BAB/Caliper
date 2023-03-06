@@ -1,4 +1,6 @@
 import com.github.breadmoirai.githubreleaseplugin.GithubReleaseTask
+import BuildConfig.Path
+import BuildConfig.Versions
 import java.util.*
 
 val taskName = "releaseArtifactsToGithub"
@@ -16,7 +18,7 @@ val token: String = if (!tokenFromEnv.isNullOrBlank()) {
 
 val repo = "caliper"
 val tagBranch = "master"
-val version = project.version.toString()
+val version = Versions.caliperVersion
 val releaseNotes = ""
 createGithubReleaseTaskInternal(token, repo, tagBranch, version, releaseNotes)
 
@@ -43,7 +45,6 @@ fun createGithubReleaseTaskInternal(
         apiEndpoint.set("https://api.github.com")
         dryRun.set(false)
         generateReleaseNotes.set(false)
-        releaseAssets.from(File(
-            project.buildDir.absolutePath + File.separator + "libs"))
+        releaseAssets.from(fileTree(Path.getAggregatedJarDirectory(project)))
     }
 }

@@ -1,8 +1,8 @@
 plugins {
     id("com.android.library")
     kotlin("android")
-
-    id("com.google.devtools.ksp") // Apply the KSP plugin ahead of Caliper
+    id("com.google.devtools.ksp")
+    `maven-central-publish`
 }
 
 android {
@@ -10,6 +10,10 @@ android {
     compileSdk = 31
     defaultConfig {
         minSdk = 21
+        aarMetadata {
+            minAgpVersion = "7.4.0"
+            minCompileSdk = 21
+        }
     }
 
     sourceSets["main"].java.srcDir("src/main/kotlin")
@@ -22,6 +26,14 @@ android {
 
     kotlinOptions {
         jvmTarget = "17"
+    }
+
+    publishing {
+        multipleVariants("allVariants") {
+            allVariants()
+            withJavadocJar()
+            withSourcesJar()
+        }
     }
 
 }
@@ -44,3 +56,4 @@ ksp {
     arg("ANDROID_APPLICATION_MODULE", "false")
     arg("MODULE_NAME", "caliper-runtime-privacy")
 }
+

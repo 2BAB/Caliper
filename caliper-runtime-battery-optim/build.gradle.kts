@@ -1,7 +1,8 @@
 plugins {
     id("com.android.library")
     kotlin("android")
-    id("com.google.devtools.ksp") // Apply the KSP plugin ahead of Caliper
+    id("com.google.devtools.ksp")
+    `maven-central-publish`
 }
 
 android {
@@ -20,6 +21,14 @@ android {
 
     kotlinOptions {
         jvmTarget = "17"
+    }
+
+    publishing {
+        multipleVariants("allVariants") {
+            allVariants()
+            withJavadocJar()
+            withSourcesJar()
+        }
     }
 }
 

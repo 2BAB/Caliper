@@ -11,12 +11,19 @@ import java.util.concurrent.atomic.AtomicBoolean
 
 abstract class CaliperProxyConfigCollectorService
     : BuildService<CaliperProxyConfigCollectorService.Params>, AutoCloseable {
-    private val logger = GradleKLogger(Logging.getLogger(CaliperProxyConfigCollectorService::class.java))
+    private val logger =
+        GradleKLogger(Logging.getLogger(CaliperProxyConfigCollectorService::class.java))
 
     internal interface Params : BuildServiceParameters {}
 
     lateinit var aggregatedProxyConfig: ProxyConfig
-    private val invoked = AtomicBoolean(false)
+
+    init {
+        logger.info(
+            "CaliperProxyConfigCollectorService is initialized.\n" +
+                    "aggregatedProxyConfig: ${::aggregatedProxyConfig.isInitialized}"
+        )
+    }
 
     override fun close() {
         if (::aggregatedProxyConfig.isInitialized) {
@@ -27,9 +34,15 @@ abstract class CaliperProxyConfigCollectorService
     }
 
     fun collect(fc: FileCollection): ProxyConfig {
-        if (invoked.compareAndSet(false, true)) {
-            aggregatedProxyConfig = CaliperProxyConfigCollector(logger).doCollect(fc.files) // TODO: can we run them in parallel?
+        val start = System.currentTimeMillis()
+        synchronized(this) {
+            if (::aggregatedProxyConfig.isInitialized.not()) {
+                aggregatedProxyConfig =
+                    CaliperProxyConfigCollector(logger).doCollect(fc.files) // TODO: run them in parallel
+            }
         }
+        val end = System.currentTimeMillis()
+        logger.info("CaliperProxyConfigCollectorService collects proxy config in ${end - start}ms")
         return aggregatedProxyConfig
     }
 

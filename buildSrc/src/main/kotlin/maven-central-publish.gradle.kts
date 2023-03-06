@@ -48,7 +48,7 @@ val emailAddr = "xx2bab@gmail.com"
 val licenseIds = "Apache-2.0"
 val licenseNames = arrayOf("The Apache Software License, Version 2.0")
 val licenseUrls = arrayOf("http://www.apache.org/licenses/LICENSE-2.0.txt")
-val inception = "2017"
+val inception = "2022"
 
 val username = "2BAB"
 
@@ -83,10 +83,11 @@ afterEvaluate {
     publishing.publications.all {
         val publicationName = this.name
         (this as MavenPublication).apply {
-            if (publicationName == "pluginMaven") {
-                groupId = groupName
-                artifactId = projectName
-            }
+//            if (publicationName == "pluginMaven") {
+//
+//            }
+            groupId = groupName
+            artifactId = project.name
             version = BuildConfig.Versions.caliperVersion
             artifact(javadocJar.get())
 
@@ -116,6 +117,18 @@ afterEvaluate {
                     connection.set(gitUrl)
                     developerConnection.set(gitUrl)
                     url.set(siteUrl)
+                }
+            }
+        }
+    }
+}
+
+if (project.name.contains("runtime")) {
+    publishing {
+        publications {
+            register<MavenPublication>("allVariants") {
+                afterEvaluate {
+                    from(components["allVariants"])
                 }
             }
         }

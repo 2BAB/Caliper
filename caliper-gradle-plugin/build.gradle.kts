@@ -4,8 +4,9 @@ plugins {
 
     alias(deps.plugins.kotlin.serialization)
     id("java-gradle-plugin")
-    `github-release`
     alias(deps.plugins.build.config)
+    `github-release`
+    `maven-central-publish`
 }
 
 version = BuildConfig.Versions.caliperVersion
@@ -97,7 +98,7 @@ configurations["functionalTestImplementation"]
 tasks.check.configure {
     dependsOn(tasks.named("test"))
     dependsOn(tasks.named("integrationTest"))
-   // dependsOn(tasks.named("functionalTest"))
+    // dependsOn(tasks.named("functionalTest"))
 }
 
 tasks.withType<Test> {
@@ -117,7 +118,7 @@ gradlePlugin {
     plugins {
         register("me.2bab.caliper") {
             id = "me.2bab.caliper"
-            implementationClass ="me.xx2bab.caliper.gradle.CaliperPlugin"
+            implementationClass = "me.xx2bab.caliper.gradle.CaliperPlugin"
             displayName = "Caliper Gradle Plugin"
         }
     }
@@ -129,4 +130,14 @@ buildConfig {
     packageName("me.xx2bab.caliper.gradle.build")
     useKotlinOutput()
     buildConfigField("String", "CALIPER_VERSION", "\"${version}\"")
+}
+afterEvaluate {
+    tasks.getByName("publishMe.2bab.caliperPluginMarkerMavenPublicationToMyMavenlocalRepository")
+        .dependsOn(tasks.getByName("signPluginMavenPublication"))
+    tasks.getByName("publishMe.2bab.caliperPluginMarkerMavenPublicationToSonatypeRepository")
+        .dependsOn(tasks.getByName("signPluginMavenPublication"))
+    tasks.getByName("publishPluginMavenPublicationToMyMavenlocalRepository")
+        .dependsOn(tasks.getByName("signMe.2bab.caliperPluginMarkerMavenPublication"))
+    tasks.getByName("publishPluginMavenPublicationToSonatypeRepository")
+        .dependsOn(tasks.getByName("signMe.2bab.caliperPluginMarkerMavenPublication"))
 }
