@@ -1,0 +1,1 @@
+{"proxiedMethods":[{"className":"android/provider/Settings$Secure","methodName":"getString","opcode":184,"replacedClassName":"me/xx2bab/caliper/runtime/wrapper/ProxyWrittenInKtForMethodReplacement_CaliperWrapper","replacedMethodName":"getString"}],"proxiedFields":[],"proxiedClasses":[]}

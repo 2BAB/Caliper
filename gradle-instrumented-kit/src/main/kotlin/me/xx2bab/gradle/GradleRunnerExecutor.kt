@@ -14,8 +14,8 @@ object GradleRunnerExecutor {
 
     private fun initTestResources(): File {
         val sampleAppDir =
-            File("build/test-samples/", "test-sample-${System.currentTimeMillis()}-${Random.nextInt(1024, 2048)}")
-        File("src/fixtures/test-sample").copyRecursively(sampleAppDir)
+            File("build/test-samples/", "android-test-sample-${System.currentTimeMillis()}-${Random.nextInt(1024, 2048)}")
+        File("src/fixtures/android-test-sample").copyRecursively(sampleAppDir)
         return sampleAppDir
     }
 
