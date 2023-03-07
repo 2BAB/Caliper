@@ -92,10 +92,7 @@ afterEvaluate {
             artifact(javadocJar.get())
 
             pom {
-                if (publicationName == "pluginMaven") {
-                    name.set(project.name)
-                }
-
+                name.set(project.name)
                 description.set(mavenDesc)
                 url.set(siteUrl)
 
