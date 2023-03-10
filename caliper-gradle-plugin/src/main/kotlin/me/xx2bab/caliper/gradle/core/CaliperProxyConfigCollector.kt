@@ -8,19 +8,20 @@ import me.xx2bab.caliper.anno.CaliperMethodProxy
 import me.xx2bab.caliper.common.ProxiedField
 import me.xx2bab.caliper.common.ProxiedMethod
 import me.xx2bab.caliper.common.toCaliperWrapperFullNameBySlash
+import org.jetbrains.kotlin.library.metadata.KlibMetadataProtoBuf.className
 import java.io.File
 import java.nio.file.Files
 import java.util.jar.JarFile
 
 class CaliperProxyConfigCollector(private val logger: KLogger) {
 
-    private val caliperMetadataFileNameRegex = "\\*.caliper.json".toRegex()
+    private val caliperMetadataFileNameRegex = Regex(""".+\.caliper\.json""")
+    private val findVariantRegex = Regex("""library_java_res[/\\](.*?)[/\\]res\.jar""")
 
     fun doCollect(fc: Set<File>): ProxyConfig {
         val asmOpcodesClassFile = extractASMOpcodesToTempDir() // TODO: lazy init
         val proxyConfig = ProxyConfig()
         fc.forEach { caliperDep ->
-            val findVariantRegex = "library_java_res[/\\\\](.*?)[/\\\\]res\\.jar".toRegex()
             val matchResult = findVariantRegex.find(caliperDep.absolutePath)
             val singleJson = if (matchResult != null) {
                 val variantName = matchResult.groupValues[1]
