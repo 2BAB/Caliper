@@ -17,7 +17,7 @@ val token: String = if (!tokenFromEnv.isNullOrBlank()) {
 
 
 val repo = "caliper"
-val tagBranch = "master"
+val tagBranch = "main"
 val version = Versions.caliperVersion
 val releaseNotes = ""
 createGithubReleaseTaskInternal(token, repo, tagBranch, version, releaseNotes)
