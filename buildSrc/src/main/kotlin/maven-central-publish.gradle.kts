@@ -3,7 +3,6 @@ plugins {
     signing
 }
 
-
 // Stub secrets to let the project sync and build without the publication values set up
 ext["signing.keyId"] = null
 ext["signing.password"] = null
@@ -49,10 +48,20 @@ val licenseIds = "Apache-2.0"
 val licenseNames = arrayOf("The Apache Software License, Version 2.0")
 val licenseUrls = arrayOf("http://www.apache.org/licenses/LICENSE-2.0.txt")
 val inception = "2022"
-
 val username = "2BAB"
 
+project.version = BuildConfig.Versions.caliperVersion
+project.group = "me.2bab"
+
 publishing {
+    publications {
+        if (project.name.contains("runtime").not()) {
+            create<MavenPublication>("CaliperArtifact") {
+                from(components["java"])
+            }
+        }
+    }
+
     // Configure MavenCentral repository
     repositories {
         maven {
@@ -83,9 +92,6 @@ afterEvaluate {
     publishing.publications.all {
         val publicationName = this.name
         (this as MavenPublication).apply {
-//            if (publicationName == "pluginMaven") {
-//
-//            }
             groupId = groupName
             artifactId = project.name
             version = BuildConfig.Versions.caliperVersion
