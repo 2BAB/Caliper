@@ -5,6 +5,7 @@
 plugins {
     kotlin("jvm")
     `maven-central-publish`
+    `jar-publish`
 }
 
 dependencies {
@@ -15,4 +16,8 @@ dependencies {
     api("org.jetbrains.kotlin:kotlin-compiler-embeddable:1.7.22") // 1.8.10
 
     testImplementation("junit:junit:4.12")
+}
+
+java {
+    withSourcesJar()
 }

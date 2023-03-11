@@ -3,15 +3,20 @@ plugins {
     signing
 }
 
-// Stub secrets to let the project sync and build without the publication values set up
+// 1. Determine the type of publication
+val publishType = project.properties["me.2bab.maven.publish.type"] as String
+println("publishType: $publishType")
+
+
+// 2. Signing and ossrh secrets setup
+// Stub secrets to pass the project sync and build without values set up
 ext["signing.keyId"] = null
 ext["signing.password"] = null
 ext["signing.secretKeyRingFile"] = null
 ext["ossrh.username"] = null
 ext["ossrh.password"] = null
-
-// Grabbing secrets from local.properties file or from environment variables,
-// which could be used on CI
+// Grabbing secrets from local.properties file
+// or from environment variables which could be used on CI
 val secretPropsFile = project.rootProject.file("local.properties")
 if (secretPropsFile.exists()) {
     secretPropsFile.reader().use {
@@ -28,13 +33,11 @@ if (secretPropsFile.exists()) {
     ext["ossrh.username"] = System.getenv("OSSRH_USERNAME")
     ext["ossrh.password"] = System.getenv("OSSRH_PASSWORD")
 }
-val javadocJar by tasks.registering(Jar::class) {
-    archiveClassifier.set("javadoc")
-}
 
 fun getExtraString(name: String) = ext[name]?.toString()
 
 
+// 3. General repo information
 val groupName = "me.2bab"
 val projectName = "caliper"
 val mavenDesc = "A monitor for Android Sensitive Permission/API based on bytecode transformation."
@@ -43,19 +46,19 @@ val siteUrl = baseUrl
 val gitUrl = "$baseUrl.git"
 val issueUrl = "$baseUrl/issues"
 val emailAddr = "xx2bab@gmail.com"
-
 val licenseIds = "Apache-2.0"
 val licenseNames = arrayOf("The Apache Software License, Version 2.0")
 val licenseUrls = arrayOf("http://www.apache.org/licenses/LICENSE-2.0.txt")
 val inception = "2022"
 val username = "2BAB"
-
 project.version = BuildConfig.Versions.caliperVersion
 project.group = "me.2bab"
 
+
+// 4. Configure publication
 publishing {
     publications {
-        if (project.name.contains("runtime").not()) {
+        if (publishType == "jar"){
             create<MavenPublication>("CaliperArtifact") {
                 from(components["java"])
             }
@@ -82,12 +85,13 @@ publishing {
         }
     }
 }
-
 signing {
     sign(publishing.publications)
 }
 
-// To add missing information for the gradle plugin coordinator
+
+// 5. To add missing information (for the gradle plugin coordinator mainly,
+// however we can use it for all publications to reduce the duplicated code)
 afterEvaluate {
     publishing.publications.all {
         val publicationName = this.name
@@ -95,7 +99,6 @@ afterEvaluate {
             groupId = groupName
             artifactId = project.name
             version = BuildConfig.Versions.caliperVersion
-            artifact(javadocJar.get())
 
             pom {
                 name.set(project.name)
@@ -120,18 +123,6 @@ afterEvaluate {
                     connection.set(gitUrl)
                     developerConnection.set(gitUrl)
                     url.set(siteUrl)
-                }
-            }
-        }
-    }
-}
-
-if (project.name.contains("runtime")) {
-    publishing {
-        publications {
-            register<MavenPublication>("allVariants") {
-                afterEvaluate {
-                    from(components["allVariants"])
                 }
             }
         }

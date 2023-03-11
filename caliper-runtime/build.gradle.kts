@@ -2,6 +2,7 @@ plugins {
     id("com.android.library")
     kotlin("android")
     `maven-central-publish`
+    `aar-publish`
 }
 
 android {
@@ -25,13 +26,6 @@ android {
     testOptions {
         unitTests {
             isIncludeAndroidResources = true
-        }
-    }
-    publishing {
-        multipleVariants("allVariants") {
-            allVariants()
-            withJavadocJar()
-            withSourcesJar()
         }
     }
 }

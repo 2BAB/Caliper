@@ -3,6 +3,7 @@ plugins {
     kotlin("android")
     id("com.google.devtools.ksp")
     `maven-central-publish`
+    `aar-publish`
 }
 
 android {
@@ -21,14 +22,6 @@ android {
 
     kotlinOptions {
         jvmTarget = "17"
-    }
-
-    publishing {
-        multipleVariants("allVariants") {
-            allVariants()
-            withJavadocJar()
-            withSourcesJar()
-        }
     }
 }
 

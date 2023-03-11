@@ -1,6 +1,6 @@
 [versions]
 kotlinVer = "1.7.22"
-agpVer = "8.0.0-beta04"
+agpVer = "8.0.0-beta05"
 asmVer = "9.4"
 kotlinpoetVer = "1.12.0"
 kspVer = "1.7.22-1.0.8" #"1.8.10-1.0.9"
@@ -8,6 +8,7 @@ kspVer = "1.7.22-1.0.8" #"1.8.10-1.0.9"
 [libraries]
 android-gradle-plugin = { module = "com.android.tools.build:gradle", version.ref = "agpVer" }
 android-gradle-pluginapi = { module = "com.android.tools.build:gradle-api", version.ref = "agpVer" }
+kotlin-plugin = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin", version.ref = "kotlinVer" }
 kotlin-std = { module = "org.jetbrains.kotlin:kotlin-stdlib-jdk8", version.ref = "kotlinVer" }
 kotlin-serialization = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version = "1.4.1" }
 apache-common-text = { module = "org.apache.commons:commons-text", version = "1.10.0" }

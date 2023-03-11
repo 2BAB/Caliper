@@ -7,6 +7,7 @@ plugins {
     alias(deps.plugins.build.config)
     `github-release`
     `maven-central-publish`
+    `jar-publish`
 }
 
 version = BuildConfig.Versions.caliperVersion
@@ -108,7 +109,6 @@ tasks.withType<Test> {
 }
 
 java {
-    withSourcesJar()
     toolchain {
         languageVersion.set(JavaLanguageVersion.of(17))
     }
@@ -131,6 +131,10 @@ buildConfig {
     useKotlinOutput()
     buildConfigField("String", "CALIPER_VERSION", "\"${version}\"")
 }
+
+// FIXME: Workaround for Gradle 8.0+ publishing issue:
+//  "implicit dependency on the `signPluginMavenPublication`
+//  and `signMe.2bab.caliperPluginMarkerMavenPublication` tasks"
 afterEvaluate {
     tasks.getByName("publishMe.2bab.caliperPluginMarkerMavenPublicationToMyMavenlocalRepository")
         .dependsOn(tasks.getByName("signPluginMavenPublication"))

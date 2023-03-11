@@ -2,6 +2,7 @@ plugins {
     kotlin("jvm")
     kotlin("plugin.serialization")
     `maven-central-publish`
+    `jar-publish`
 }
 
 dependencies {
