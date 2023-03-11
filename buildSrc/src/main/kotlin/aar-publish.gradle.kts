@@ -8,6 +8,7 @@ android {
         multipleVariants("allVariants") {
             allVariants()
             withSourcesJar()
+            withJavadocJar()
         }
     }
 }
