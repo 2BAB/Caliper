@@ -1,4 +1,4 @@
-package me.xx2bab.caliper.tool
+package me.xx2bab.caliper.gradle.tool
 
 fun Any.invokeMethod(clazz: Class<*>, methodName: String, vararg args: String): String {
     val method = clazz.getDeclaredMethod(methodName)

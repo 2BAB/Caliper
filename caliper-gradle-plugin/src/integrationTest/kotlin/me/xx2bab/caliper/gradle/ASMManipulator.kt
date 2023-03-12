@@ -1,4 +1,4 @@
-package me.xx2bab.caliper.gradle.core
+package me.xx2bab.caliper.gradle
 
 import org.objectweb.asm.ClassReader
 import org.objectweb.asm.ClassVisitor

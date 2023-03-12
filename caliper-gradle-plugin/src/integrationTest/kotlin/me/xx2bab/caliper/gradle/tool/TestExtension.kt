@@ -1,4 +1,4 @@
-package me.xx2bab.caliper.tool
+package me.xx2bab.caliper.gradle.tool
 
 import java.io.File
 import org.objectweb.asm.ClassReader

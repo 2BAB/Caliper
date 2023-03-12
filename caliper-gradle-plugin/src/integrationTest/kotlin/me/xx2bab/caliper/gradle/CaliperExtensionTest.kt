@@ -1,6 +1,5 @@
-package me.xx2bab.caliper
+package me.xx2bab.caliper.gradle
 
-import me.xx2bab.caliper.gradle.CaliperExtension
 import org.gradle.testfixtures.ProjectBuilder
 import org.hamcrest.MatcherAssert.assertThat
 import org.junit.jupiter.api.Test
