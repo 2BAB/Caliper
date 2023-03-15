@@ -6,6 +6,7 @@ import com.squareup.javapoet.ClassName
 import com.squareup.javapoet.JavaFile
 import com.squareup.javapoet.MethodSpec
 import com.squareup.javapoet.ParameterSpec
+import com.squareup.javapoet.TypeName
 import com.squareup.javapoet.TypeSpec
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
@@ -29,6 +30,7 @@ class CaliperWrapperGenerator(
     fun generate() {
         val proxiedMetaData = ProxiedMetaData()
         metadataMap.forEach { (className, metadata) ->
+            val fullClassNameBySlash = className.replace(".", "/")
             val simpleClassName = className.split(".").last()
             val wrapperSimpleClassName = simpleClassName.toCaliperWrapperSimpleName()
             val wrapperFullClassNameBySlash = simpleClassName.toCaliperWrapperFullNameBySlash()
@@ -36,8 +38,8 @@ class CaliperWrapperGenerator(
             if (metadata.targetClass != null) {
                 proxiedMetaData.proxiedClasses.add(
                     ProxiedClass(
-                        className = metadata.targetClass!!,
-                        replacedClassName = className.replace(".", "/")
+                        targetClassName = metadata.targetClass!!,
+                        newClassName = fullClassNameBySlash
                     )
                 )
 
@@ -66,20 +68,24 @@ class CaliperWrapperGenerator(
                         proxyMethod.targetType == CaliperMethodProxy::class.simpleName
                     if (isAnnotatedWithProxyMethod) {
                         val pm = ProxiedMethod(
-                            className = proxyMethod.targetClassName,
-                            methodName = proxyMethod.targetElementName,
-                            opcode = proxyMethod.targetOpcode,
-                            replacedClassName = wrapperFullClassNameBySlash,
-                            replacedMethodName = proxyMethod.methodName
+                            targetClassName = proxyMethod.targetClassName,
+                            targetMethodName = proxyMethod.targetElementName,
+                            targetOpcode = proxyMethod.targetOpcode,
+                            newClassName = fullClassNameBySlash,
+                            newMethodName = proxyMethod.methodName,
+                            wrapperClassName = wrapperFullClassNameBySlash,
+                            wrapperMethodName = proxyMethod.methodName
                         )
                         proxiedMetaData.proxiedMethods.add(pm)
                     } else {
                         val pf = ProxiedField(
-                            className = proxyMethod.targetClassName,
-                            fieldName = proxyMethod.targetElementName,
-                            opcode = proxyMethod.targetOpcode,
-                            replacedClassName = wrapperFullClassNameBySlash,
-                            replacedMethodName = proxyMethod.methodName
+                            targetClassName = proxyMethod.targetClassName,
+                            targetFieldName = proxyMethod.targetElementName,
+                            targetOpcode = proxyMethod.targetOpcode,
+                            newClassName = fullClassNameBySlash,
+                            newMethodName = proxyMethod.methodName,
+                            wrapperClassName = wrapperFullClassNameBySlash,
+                            wrapperMethodName = proxyMethod.methodName
                         )
                         proxiedMetaData.proxiedFields.add(pf)
                     }
@@ -103,8 +109,10 @@ class CaliperWrapperGenerator(
                     }
                     logger.lifecycle(proxyMethod.targetClassName)
                     val caliperClass = ClassName.get("me.xx2bab.caliper.runtime", "Caliper")
-                    MethodSpec.methodBuilder(proxyMethod.methodName).returns(proxyMethod.returnType)
-                        .addModifiers(Modifier.PUBLIC, Modifier.STATIC).addParameters(inputParams)
+                    MethodSpec.methodBuilder(proxyMethod.methodName)
+                        .returns(proxyMethod.returnType)
+                        .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
+                        .addParameters(inputParams)
                         .addStatement(
                             "\$T.log(\""
                                     + proxyMethod.targetClassName.replace(

@@ -2,6 +2,7 @@ package me.xx2bab.caliper.gradle.core
 
 import io.mockk.spyk
 import me.xx2bab.caliper.anno.ASMOpcodes
+import me.xx2bab.caliper.common.ProxiedMethod
 import org.hamcrest.MatcherAssert.assertThat
 import org.hamcrest.Matchers.containsInAnyOrder
 import org.hamcrest.Matchers.`is`
@@ -28,18 +29,18 @@ class CaliperProxyConfigCollectorTest {
         )
         val result = config.doCollect(setOf(localResJar))
         assertThat(result.proxiedMethods.size, `is`(1))
-        assertThat(result.proxiedMethods.first().methodName, `is`("commonMethodReturnsString"))
+        assertThat(result.proxiedMethods.first().targetMethodName, `is`("commonMethodReturnsString"))
         assertThat(
-            result.proxiedMethods.first().className,
+            result.proxiedMethods.first().targetClassName,
             `is`("me/xx2bab/caliper/sample/library/LibrarySampleClass")
         )
-        assertThat(result.proxiedMethods.first().opcode, `is`(ASMOpcodes.INVOKEVIRTUAL))
+        assertThat(result.proxiedMethods.first().targetOpcode, `is`(ASMOpcodes.INVOKEVIRTUAL))
         assertThat(
-            result.proxiedMethods.first().replacedMethodName,
+            result.proxiedMethods.first().wrapperMethodName,
             `is`("commonMethodReturnsString")
         )
         assertThat(
-            result.proxiedMethods.first().replacedClassName,
+            result.proxiedMethods.first().wrapperClassName,
             `is`("me/xx2bab/caliper/runtime/wrapper/CustomProxy_CaliperWrapper")
         )
     }
@@ -53,37 +54,44 @@ class CaliperProxyConfigCollectorTest {
         )
         val result = config.doCollect(setOf(remoteClassJar))
 
-        assertThat(result.proxiedMethods.size, `is`(2))
-        assertThat(
-            result.proxiedMethods.map { it.methodName },
-            containsInAnyOrder("getSerial", "getString")
-        )
-        assertThat(
-            result.proxiedMethods.map { it.className },
-            containsInAnyOrder("android/os/Build", "android/provider/Settings\$Secure")
-        )
-        assertThat(
-            result.proxiedMethods.map { it.opcode },
-            containsInAnyOrder(ASMOpcodes.INVOKESTATIC, ASMOpcodes.INVOKESTATIC)
-        )
-        assertThat(
-            result.proxiedMethods.map { it.replacedMethodName },
-            containsInAnyOrder("getSerial", "getString")
-        )
-        assertThat(
-            result.proxiedMethods.map { it.replacedClassName }, containsInAnyOrder(
+        assertThat(result.proxiedMethods.size, `is`(3))
+        assertThat(result.proxiedMethods, containsInAnyOrder(
+            ProxiedMethod(
+                "android/os/Build",
+                "getSerial",
+                ASMOpcodes.INVOKESTATIC,
+                "me/xx2bab/caliper/privacy/AndroidOSBuildProxy",
+                "getSerial",
                 "me/xx2bab/caliper/runtime/wrapper/AndroidOSBuildProxy_CaliperWrapper",
-                "me/xx2bab/caliper/runtime/wrapper/SettingsSecureProxy_CaliperWrapper"
+                "getSerial"
+            ),
+            ProxiedMethod(
+                "android/provider/Settings\$Secure",
+                "getString",
+                ASMOpcodes.INVOKESTATIC,
+                "me/xx2bab/caliper/privacy/SettingsSecureProxy",
+                "getString",
+                "me/xx2bab/caliper/runtime/wrapper/SettingsSecureProxy_CaliperWrapper",
+                "getString"
+            ),
+            ProxiedMethod(
+                "android/app/Activity",
+                "requestPermissions",
+                ASMOpcodes.INVOKEVIRTUAL,
+                "me/xx2bab/caliper/privacy/ActivityProxy",
+                "requestPermissions",
+                "me/xx2bab/caliper/runtime/wrapper/ActivityProxy_CaliperWrapper",
+                "requestPermissions"
             )
-        )
+        ))
 
         assertThat(result.proxiedFields.size, `is`(1))
-        assertThat(result.proxiedFields.first().fieldName, `is`("SERIAL"))
-        assertThat(result.proxiedFields.first().className, `is`("android/os/Build"))
-        assertThat(result.proxiedFields.first().opcode, `is`(ASMOpcodes.GETSTATIC))
-        assertThat(result.proxiedFields.first().replacedMethodName, `is`("getSerialField"))
+        assertThat(result.proxiedFields.first().targetFieldName, `is`("SERIAL"))
+        assertThat(result.proxiedFields.first().targetClassName, `is`("android/os/Build"))
+        assertThat(result.proxiedFields.first().targetOpcode, `is`(ASMOpcodes.GETSTATIC))
+        assertThat(result.proxiedFields.first().wrapperMethodName, `is`("getSerialField"))
         assertThat(
-            result.proxiedFields.first().replacedClassName,
+            result.proxiedFields.first().wrapperClassName,
             `is`("me/xx2bab/caliper/runtime/wrapper/AndroidOSBuildProxy_CaliperWrapper")
         )
     }

@@ -78,11 +78,13 @@ class NonStaticMethodAndFieldProxyTest {
             config = ProxyConfig(
                 proxiedMethods = mutableListOf(
                     ProxiedMethod(
-                        className = "android/app/Activity",
-                        methodName = "requestPermissions",
-                        opcode = ASMOpcodes.INVOKEVIRTUAL,
-                        replacedClassName = "ActivityProxy",
-                        replacedMethodName = "requestPermissions"
+                        targetClassName = "android/app/Activity",
+                        targetMethodName = "requestPermissions",
+                        targetOpcode = ASMOpcodes.INVOKEVIRTUAL,
+                        newClassName = "", // unnecessary for this test
+                        newMethodName = "", // unnecessary for this test
+                        wrapperClassName = "ActivityProxy",
+                        wrapperMethodName = "requestPermissions"
                     )
                 )
             ),
@@ -155,11 +157,13 @@ class NonStaticMethodAndFieldProxyTest {
             config = ProxyConfig(
                 proxiedFields = mutableListOf(
                     ProxiedField(
-                        className = "NonStaticFieldFoo",
-                        fieldName = "bar",
-                        opcode = ASMOpcodes.GETFIELD,
-                        replacedClassName = "NonStaticFieldFooProxy",
-                        replacedMethodName = "getBar"
+                        targetClassName = "NonStaticFieldFoo",
+                        targetFieldName = "bar",
+                        targetOpcode = ASMOpcodes.GETFIELD,
+                        newClassName = "", // unnecessary for this test
+                        newMethodName = "", // unnecessary for this test
+                        wrapperClassName = "NonStaticFieldFooProxy",
+                        wrapperMethodName = "getBar"
                     )
                 )
             ),

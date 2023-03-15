@@ -84,11 +84,13 @@ class StaticMethodAndFieldProxyTest {
                 proxiedMethods = mutableListOf(),
                 proxiedFields = mutableListOf(
                     ProxiedField(
-                        className = "android/os/Build",
-                        fieldName = "SERIAL",
-                        opcode = ASMOpcodes.GETSTATIC,
-                        replacedClassName = "me/xx2bab/caliper/runtime/Caliper",
-                        replacedMethodName = "getSerial"
+                        targetClassName = "android/os/Build",
+                        targetFieldName = "SERIAL",
+                        targetOpcode = ASMOpcodes.GETSTATIC,
+                        newClassName = "", // unnecessary for this test
+                        newMethodName = "", // unnecessary for this test
+                        wrapperClassName = "me/xx2bab/caliper/runtime/Caliper",
+                        wrapperMethodName = "getSerial"
                     )
                 )
             ),
@@ -194,11 +196,13 @@ class StaticMethodAndFieldProxyTest {
             config = ProxyConfig(
                 proxiedMethods = mutableListOf(
                     ProxiedMethod(
-                        className = "android/provider/Settings\$Secure",
-                        methodName = "getString",
-                        opcode = ASMOpcodes.INVOKESTATIC,
-                        replacedClassName = "me/xx2bab/caliper/runtime/Caliper",
-                        replacedMethodName = "getString"
+                        targetClassName = "android/provider/Settings\$Secure",
+                        targetMethodName = "getString",
+                        targetOpcode = ASMOpcodes.INVOKESTATIC,
+                        newClassName = "", // unnecessary for this test
+                        newMethodName = "", // unnecessary for this test
+                        wrapperClassName = "me/xx2bab/caliper/runtime/Caliper",
+                        wrapperMethodName = "getString"
                     )
                 )
             ),

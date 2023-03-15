@@ -7,7 +7,6 @@ import org.gradle.api.file.FileCollection
 import org.gradle.api.logging.Logging
 import org.gradle.api.services.BuildService
 import org.gradle.api.services.BuildServiceParameters
-import java.util.concurrent.atomic.AtomicBoolean
 
 abstract class CaliperProxyConfigCollectorService
     : BuildService<CaliperProxyConfigCollectorService.Params>, AutoCloseable {
@@ -17,6 +16,7 @@ abstract class CaliperProxyConfigCollectorService
     internal interface Params : BuildServiceParameters {}
 
     lateinit var aggregatedProxyConfig: ProxyConfig
+    lateinit var excludeClassList: MutableSet<String>
 
     init {
         logger.info(
@@ -34,16 +34,36 @@ abstract class CaliperProxyConfigCollectorService
     }
 
     fun collect(fc: FileCollection): ProxyConfig {
-        val start = System.currentTimeMillis()
         synchronized(this) {
             if (::aggregatedProxyConfig.isInitialized.not()) {
+                val start = System.currentTimeMillis()
                 aggregatedProxyConfig =
                     CaliperProxyConfigCollector(logger).doCollect(fc.files) // TODO: run them in parallel
+                val end = System.currentTimeMillis()
+                logger.info("CaliperProxyConfigCollectorService collects proxy config in ${end - start}ms")
+                logger.info("Aggregated Proxy Config: $aggregatedProxyConfig")
             }
         }
-        val end = System.currentTimeMillis()
-        logger.info("CaliperProxyConfigCollectorService collects proxy config in ${end - start}ms")
         return aggregatedProxyConfig
     }
 
+    fun pullTransformExcludedList(fc: FileCollection): Set<String> {
+        synchronized(this) {
+            if (::excludeClassList.isInitialized.not()) {
+                excludeClassList = mutableSetOf()
+                collect(fc)
+                aggregatedProxyConfig.proxiedClasses.forEach {
+                    excludeClassList.add(it.newClassName)
+                }
+                aggregatedProxyConfig.proxiedMethods.forEach {
+                    excludeClassList.add(it.newClassName)
+                }
+                aggregatedProxyConfig.proxiedFields.forEach {
+                    excludeClassList.add(it.newClassName)
+                }
+                logger.info("Generate Transform-Exclude List: $excludeClassList")
+            }
+        }
+        return excludeClassList
+    }
 }

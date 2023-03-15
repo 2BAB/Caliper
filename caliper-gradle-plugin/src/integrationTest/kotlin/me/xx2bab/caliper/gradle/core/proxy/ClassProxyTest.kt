@@ -76,8 +76,8 @@ class ClassProxyTest {
             config = ProxyConfig(
                 proxiedClasses = mutableListOf(
                     ProxiedClass(
-                        className = "java/lang/Thread",
-                        replacedClassName = "NamedThread"
+                        targetClassName = "java/lang/Thread",
+                        newClassName = "NamedThread"
                     )
                 )
             )
