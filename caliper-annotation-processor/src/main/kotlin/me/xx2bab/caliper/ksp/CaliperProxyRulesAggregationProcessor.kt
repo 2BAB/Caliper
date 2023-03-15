@@ -3,6 +3,7 @@ package me.xx2bab.caliper.ksp
 import com.google.devtools.ksp.processing.*
 import com.google.devtools.ksp.symbol.*
 import com.google.devtools.ksp.validate
+import com.squareup.javapoet.TypeName
 import com.squareup.kotlinpoet.javapoet.KotlinPoetJavaPoetPreview
 import com.squareup.kotlinpoet.javapoet.toJTypeName
 import com.squareup.kotlinpoet.ksp.toTypeName
@@ -153,7 +154,10 @@ class CaliperProxyRulesAggregationProcessor(
             val className = currClass.qualifiedName!!.asString()
             logger.info("className = $className")
 
-            val functionReturnType = function.returnType?.toTypeName()?.toJTypeName()
+            var functionReturnType = function.returnType?.toTypeName()?.toJTypeName()
+            if (functionReturnType == null || functionReturnType.toString() == "kotlin.Unit") {
+               functionReturnType = TypeName.VOID
+            }
             logger.info("functionReturnType = $functionReturnType")
 
             val functionParameters = function.parameters

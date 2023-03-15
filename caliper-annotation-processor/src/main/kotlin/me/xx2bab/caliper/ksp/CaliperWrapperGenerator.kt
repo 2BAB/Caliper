@@ -115,7 +115,8 @@ class CaliperWrapperGenerator(
                                     + "$paramNameArray, "
                                     + "$paramInstanceArray)", caliperClass
                         )
-                        .addStatement("return $className.${proxyMethod.methodName}($invokeParams)")
+                        .addStatement((if (proxyMethod.returnType != null && proxyMethod.returnType != TypeName.VOID) "return " else "")
+                                + "$className.${proxyMethod.methodName}($invokeParams)")
                         .build()
                 }
 
