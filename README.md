@@ -2,54 +2,23 @@
 
 🚧 **It's currently under incubating...**
 
-A monitor for Android Sensitive Permission/API based on bytecode transformation.
+A monitor & controller for Android sensitive permissions/api calls based on bytecode transformation.
 
-Inspired by [allenymt/PrivacySentry](https://github.com/allenymt/PrivacySentry).
+## Features
 
-## Quick Start
+## Integration
 
-**0x01. Add the plugin to classpath:**
-
-``` kotlin
-// Option 1.
-// Add `mavenCentral` to `pluginManagement{}` on `settings.gradle.kts` (or the root `build.gradle.kts`),
-// and then the caliper plugin id.
-pluginManagement {
-	repositories {
-        ...
-        mavenCentral()
-    }
-    plugins {
-    	...
-    	id("me.2bab.caliper") version "0.1.0" apply false
-    }
-}
-
-// Option 2.
-// Using classic `buildscript{}` block in root build.gradle.kts.
-buildscript {
-    repositories {
-        ...
-        mavenCentral()
-    }
-    dependencies {
-        ...
-        classpath("me.2bab:caliper:0.1.0")
-    }
-}
-```
-
-To be continued...
+Please navigate to [Integration Guide](./integration.md) for full details.
 
 ## Compatible Specification
 
-Polyfill is only supported & tested on latest Major versions of Android Gradle Plugin.
+Caliper is only supported & tested on latest 2 Minor versions of Android Gradle Plugin.
 
 **Changelog** can be found from the [Releases](https://github.com/2BAB/Caliper/releases).
     
-|  AGP Version  | Latest Support Version |
-|:-------------:|:----------------------:|
-|  7.0.x~7.3.x  |           /            |
+| AGP Version | Recommended Gradle Version | Compiled Kotlin Version |   Compiled Kotlin Version    | Latest Support Version |
+|:-----------:|:--------------------------:|:-----------------------:|:----------------------------:|:----------------------:|
+|    8.0.x    |           8.0.2+           |         1.7.22          |         1.7.22-1.0.8         |         0.2.0          |
 
 
 ## Git Commit Check
@@ -63,10 +32,15 @@ So far we haven't added any hook tool, but follow the regex below:
 (chore|feat|docs|fix|refactor|style|test|hack|release)(:)( )(.{0,80})
 ```
 
+## Credits
+
+- The design of interceptor rules (`@CaliperProxyXyz`) was inspired by [allenymt/PrivacySentry](https://github.com/allenymt/PrivacySentry).
+- The Kotlin code-analyzer forked from [bennyhuo/kotlin-code-analyzer](https://github.com/bennyhuo/kotlin-code-analyzer). 
+
 ## License
 
 >
-> Copyright 2018-2023 2BAB
+> Copyright 2022-2023 2BAB
 >
 > Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the License. You may obtain a copy of the License at
 >
