@@ -38,7 +38,7 @@ class CaliperWrapperGenerator(
             if (metadata.targetClass != null) {
                 proxiedMetaData.proxiedClasses.add(
                     ProxiedClass(
-                        targetClassName = metadata.targetClass!!,
+                        targetClassName = metadata.targetClass!!.replace(".", "/"),
                         newClassName = fullClassNameBySlash
                     )
                 )

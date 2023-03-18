@@ -63,7 +63,7 @@ class CaliperProxyConfigCollector(private val logger: KLogger) {
             "${projectRootPath}/src/main/groovy",
             "${projectRootPath}/src/main/java",
         ).filter {
-            File(it).exists()
+            File(it).exists() // TODO: may need to check all sub-directories that at least one file exists
         }
 
         val s = SimpleAnnotationAnalyzer(logger)
@@ -124,7 +124,7 @@ class CaliperProxyConfigCollector(private val logger: KLogger) {
                 val fullClassName = className.replace(".", "/")
                 proxyConfig.proxiedClasses.add(
                     ProxiedClass(
-                        targetClassName = parameters["className"]!!,
+                        targetClassName = parameters["className"]!!.replace(".", "/"),
                         newClassName = fullClassName
                     )
                 )
