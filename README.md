@@ -4,7 +4,24 @@
 
 A monitor & controller for Android sensitive permissions/api calls based on bytecode transformation.
 
-## Features
+It supports adding custom proxy rules to intercept sensitive api calls with a single annotation like below:
+
+```kotlin
+object ActivityProxy {
+
+    @CaliperMethodProxy(
+        className = "android/app/Activity",
+        methodName = "requestPermissions",
+        opcode = ASMOpcodes.INVOKEVIRTUAL
+    )
+    @JvmStatic
+    fun requestPermissions(activity: Activity, permissions: Array<String>, requestCode: Int) {
+        activity.requestPermissions(permissions, requestCode)
+    }
+}
+```
+
+Now all `Activity#requestPermissions` calls will be forwarded to the proxy method.
 
 ## Integration
 
