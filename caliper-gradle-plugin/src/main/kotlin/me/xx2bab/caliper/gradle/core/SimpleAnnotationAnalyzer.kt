@@ -4,6 +4,7 @@ import com.bennyhuo.kotlin.analyzer.KotlinCodeAnalyzer
 import com.bennyhuo.kotlin.analyzer.buildOptions
 import org.apache.commons.text.StringEscapeUtils
 import org.jetbrains.kotlin.descriptors.PropertyDescriptor
+import org.jetbrains.kotlin.psi.KtClass
 import org.jetbrains.kotlin.psi.KtObjectDeclaration
 import org.jetbrains.kotlin.psi.ValueArgument
 import org.jetbrains.kotlin.resolve.BindingContext
@@ -43,10 +44,11 @@ class SimpleAnnotationAnalyzer(private val logger: KLogger) {
         result.files.forEach {
             val packageName = it.packageFqName.asString()
             it.declarations.forEach { decl ->
-                if (decl is KtObjectDeclaration) {
-                    val obj = decl
-                    val className = obj.nameAsSafeName.asString()
-                    obj.annotationEntries.forEach { anno ->
+                // TODO: support Java file analysis (current detekt settings does not recognize Java files)
+                if (decl is KtClass) {
+                    val clazz = decl
+                    val className = clazz.nameAsSafeName.asString()
+                    clazz.annotationEntries.forEach { anno ->
                         val parameters =
                             parseAnnotationArguments(anno.valueArguments, result.bindingContext)
                         visitor.visitClassAnnotation(
@@ -55,6 +57,10 @@ class SimpleAnnotationAnalyzer(private val logger: KLogger) {
                             "$packageName.$className"
                         )
                     }
+                }
+                if (decl is KtObjectDeclaration) {
+                    val obj = decl
+                    val className = obj.nameAsSafeName.asString()
                     obj.body?.functions?.forEach { func ->
                         val funcName = func.nameAsSafeName.asString()
                         func.annotationEntries.forEach { anno ->

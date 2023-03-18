@@ -10,10 +10,10 @@ android {
     namespace = "me.xx2bab.caliper.runtime.privacy"
     compileSdk = 31
     defaultConfig {
-        minSdk = 21
+        minSdk = 23
         aarMetadata {
             minAgpVersion = "7.4.0"
-            minCompileSdk = 21
+            minCompileSdk = 23
         }
     }
 

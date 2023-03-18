@@ -76,7 +76,7 @@ class ClassProxyWrapperGenTest {
                 package me.xx2bab.caliper.test;
                 import me.xx2bab.caliper.anno.CaliperClassProxy
                 @CaliperClassProxy(className = "java.lang.Thread")
-                open class ThreadClassProxyWrittenInJava(name: String) : Thread(name + "mockedNameSuffix") {} 
+                open class ThreadClassProxyWrittenInKotlin(name: String) : Thread(name + "mockedNameSuffix") {} 
         """
         )
 
@@ -101,7 +101,7 @@ class ClassProxyWrapperGenTest {
             kspGenDir,
             "resources/app.caliper.json"
         ).readText()
-        val expectJson = File("src/test/resources/thread.caliper.json").readText()
+        val expectJson = File("src/test/resources/thread-kt.caliper.json").readText()
         assertThat(expectJson, equalToCompressingWhiteSpace(generatedJson))
     }
 

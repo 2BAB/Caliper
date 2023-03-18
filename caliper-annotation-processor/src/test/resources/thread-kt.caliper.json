@@ -1,0 +1,1 @@
+{"proxiedMethods":[],"proxiedFields":[],"proxiedClasses":[{"targetClassName":"java/lang/Thread","newClassName":"me/xx2bab/caliper/test/ThreadClassProxyWrittenInKotlin"}]}

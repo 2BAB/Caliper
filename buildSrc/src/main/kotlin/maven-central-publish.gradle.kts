@@ -5,7 +5,7 @@ plugins {
 
 // 1. Determine the type of publication
 val publishType = project.properties["me.2bab.maven.publish.type"] as String
-println("publishType: $publishType")
+//println("publishType: $publishType")
 
 
 // 2. Signing and ossrh secrets setup

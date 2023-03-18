@@ -5,10 +5,10 @@ import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.decodeFromStream
 import me.xx2bab.caliper.anno.CaliperFieldProxy
 import me.xx2bab.caliper.anno.CaliperMethodProxy
+import me.xx2bab.caliper.common.ProxiedClass
 import me.xx2bab.caliper.common.ProxiedField
 import me.xx2bab.caliper.common.ProxiedMethod
 import me.xx2bab.caliper.common.toCaliperWrapperFullNameBySlash
-import org.jetbrains.kotlin.library.metadata.KlibMetadataProtoBuf.className
 import java.io.File
 import java.nio.file.Files
 import java.util.jar.JarFile
@@ -63,7 +63,7 @@ class CaliperProxyConfigCollector(private val logger: KLogger) {
             "${projectRootPath}/src/main/groovy",
             "${projectRootPath}/src/main/java",
         ).filter {
-            File(it).exists()
+            File(it).exists() // TODO: may need to check all sub-directories that at least one file exists
         }
 
         val s = SimpleAnnotationAnalyzer(logger)
@@ -82,24 +82,29 @@ class CaliperProxyConfigCollector(private val logger: KLogger) {
                             "    methodName = $methodName"
                 )
                 val simpleClassName = className.split(".").last()
+                val fullClassName = className.replace(".", "/")
                 if (annotation == CaliperMethodProxy::class.simpleName) {
                     proxyConfig.proxiedMethods.add(
                         ProxiedMethod(
-                            className = parameters["className"]!!,
-                            methodName = parameters["methodName"]!!,
-                            opcode = parameters["opcode"]!!.toInt(),
-                            replacedClassName = simpleClassName.toCaliperWrapperFullNameBySlash(),
-                            replacedMethodName = methodName
+                            targetClassName = parameters["className"]!!,
+                            targetMethodName = parameters["methodName"]!!,
+                            targetOpcode = parameters["opcode"]!!.toInt(),
+                            newClassName = fullClassName,
+                            newMethodName = methodName,
+                            wrapperClassName = simpleClassName.toCaliperWrapperFullNameBySlash(),
+                            wrapperMethodName = methodName
                         )
                     )
                 } else if (annotation == CaliperFieldProxy::class.simpleName) {
                     proxyConfig.proxiedFields.add(
                         ProxiedField(
-                            className = parameters["className"]!!,
-                            fieldName = parameters["fieldName"]!!,
-                            opcode = parameters["opcode"]!!.toInt(),
-                            replacedClassName = simpleClassName.toCaliperWrapperFullNameBySlash(),
-                            replacedMethodName = methodName
+                            targetClassName = parameters["className"]!!,
+                            targetFieldName = parameters["fieldName"]!!,
+                            targetOpcode = parameters["opcode"]!!.toInt(),
+                            newClassName = fullClassName,
+                            newMethodName = methodName,
+                            wrapperClassName = simpleClassName.toCaliperWrapperFullNameBySlash(),
+                            wrapperMethodName = methodName
                         )
                     )
                 }
@@ -115,6 +120,13 @@ class CaliperProxyConfigCollector(private val logger: KLogger) {
                             "    annotation = $annotation" +
                             "    params = $parameters" +
                             "    className = $className"
+                )
+                val fullClassName = className.replace(".", "/")
+                proxyConfig.proxiedClasses.add(
+                    ProxiedClass(
+                        targetClassName = parameters["className"]!!.replace(".", "/"),
+                        newClassName = fullClassName
+                    )
                 )
             }
 

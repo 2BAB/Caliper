@@ -1,3 +1,5 @@
+import org.jetbrains.kotlin.gradle.internal.Kapt3GradleSubplugin.Companion.isIncludeCompileClasspath
+
 plugins {
     id("com.android.application")
     kotlin("android")
@@ -62,15 +64,29 @@ android {
         jvmTarget = "17"
     }
 
+    testOptions {
+        unitTests {
+            // For AGP to trigger the resources package and other tasks for test variants
+            // especially when using Robolectric to do Unit Test.
+            isIncludeAndroidResources = true
+        }
+    }
 }
 
 dependencies {
     implementation(project(":library"))
     implementation(deps.kotlin.std)
     implementation("androidx.appcompat:appcompat:1.4.1")
+    implementation("com.google.android.material:material:1.4.+")
+    implementation("androidx.constraintlayout:constraintlayout:2.1.3")
 
     caliper("me.2bab:caliper-runtime-privacy:+")
+    caliper("me.2bab:caliper-runtime-battery-optim:+")
     caliper(project(":custom-proxy"))
+
+    testImplementation(deps.junit4)
+    testImplementation(deps.robolectric)
+    testImplementation(deps.hamcrest)
 }
 
 // Run `./gradlew clean assembleFullDebug` for testing

@@ -4,24 +4,28 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class ProxiedMethod(
-    val className: String,
-    val methodName: String,
-    val opcode: Int,
-    val replacedClassName: String,
-    val replacedMethodName: String
+    val targetClassName: String,
+    val targetMethodName: String,
+    val targetOpcode: Int,
+    val newClassName: String,
+    val newMethodName: String,
+    val wrapperClassName: String,
+    val wrapperMethodName: String
 )
 
 @Serializable
 data class ProxiedField(
-    val className: String,
-    val fieldName: String,
-    val opcode: Int,
-    val replacedClassName: String,
-    val replacedMethodName: String
+    val targetClassName: String,
+    val targetFieldName: String,
+    val targetOpcode: Int,
+    val newClassName: String,
+    val newMethodName: String,
+    val wrapperClassName: String,
+    val wrapperMethodName: String
 )
 
 @Serializable
 data class ProxiedClass(
-    val className: String,
-    val replacedClassName: String
+    val targetClassName: String,
+    val newClassName: String
 )

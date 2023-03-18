@@ -23,27 +23,29 @@ interface CaliperClassVisitorFactoryParam : InstrumentationParameters {
 abstract class CaliperClassVisitorFactory :
     AsmClassVisitorFactory<CaliperClassVisitorFactoryParam> {
 
+    override fun isInstrumentable(classData: ClassData): Boolean {
+        val res = parameters.get()
+            .collectorServiceProp.get()
+            .pullTransformExcludedList(parameters.get().variantCaliperConfiguration)
+            .contains(classData.className)
+            .not()
+        CaliperPlugin.logger.debug("isInstrumentable: ${classData.className} $res")
+        return res
+    }
+
     override fun createClassVisitor(
         classContext: ClassContext,
         nextClassVisitor: ClassVisitor
     ): ClassVisitor {
-        val aggregation = parameters.get().collectorServiceProp.get().collect(parameters.get().variantCaliperConfiguration)
-
-        CaliperPlugin.logger.info("Aggregated Proxy Config: $aggregation")
-
+        val aggregation = parameters.get()
+            .collectorServiceProp.get()
+            .collect(parameters.get().variantCaliperConfiguration)
         return CaliperClassVisitor(
             api = Opcodes.ASM9,
             classVisitor = nextClassVisitor,
             config = aggregation,
             logger = CaliperPlugin.logger
         )
-    }
-
-    override fun isInstrumentable(classData: ClassData): Boolean {
-        return true
-//        return classData.className.startsWith("me.xx2bab.caliper.sample.MainActivity")
-//        return (classData.className.startsWith("me.xx2bab.caliper.runtime")
-//                || classData.className.startsWith("me.xx2bab.caliper.sample.customproxy")).not()
     }
 
 }

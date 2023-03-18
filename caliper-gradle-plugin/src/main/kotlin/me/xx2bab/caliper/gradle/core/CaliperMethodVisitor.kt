@@ -16,7 +16,7 @@ class CaliperMethodVisitor(
     private val logger: KLogger = DefaultKotlinLogger()
 ) : AdviceAdapter(ASM9, superVisitor, access, methodName, descriptor) {
 
-    private var isNewOperationCodeFound = false
+    private var isNewOperationCodeFound = ""
 
     override fun visitTypeInsn(opcode: Int, type: String?) {
         logger.debug(
@@ -24,9 +24,9 @@ class CaliperMethodVisitor(
         )
         val classProxies = proxyConfig.proxiedClasses
         for (cp in classProxies) {
-            if (opcode == NEW && type == cp.className) {
-                isNewOperationCodeFound = true
-                superVisitor.visitTypeInsn(NEW, cp.replacedClassName)
+            if (opcode == NEW && type == cp.targetClassName) {
+                isNewOperationCodeFound = cp.targetClassName
+                superVisitor.visitTypeInsn(NEW, cp.newClassName)
                 return
             }
         }
@@ -41,9 +41,9 @@ class CaliperMethodVisitor(
         )
         val fieldProxies = proxyConfig.proxiedFields
         for (fp in fieldProxies) {
-            if (opcode == fp.opcode
-                && owner == fp.className
-                && name == fp.fieldName
+            if (opcode == fp.targetOpcode
+                && owner == fp.targetClassName
+                && name == fp.targetFieldName
                 && descriptor != null // All sensitive data should have at least an output of the API call.
                 && className.contains(CALIPER_PACKAGE_FOR_WRAPPER_SPLIT_BY_SLASH).not()
             ) {
@@ -51,17 +51,17 @@ class CaliperMethodVisitor(
                 if (opcode == ASMOpcodes.GETSTATIC) {
                     visitMethodInsn(
                         opcode = INVOKESTATIC,
-                        owner = fp.replacedClassName,
-                        methodName = fp.replacedMethodName,
+                        owner = fp.wrapperClassName,
+                        methodName = fp.wrapperMethodName,
                         descriptor = "()$descriptor",
                         isInterface = false
                     )
                 } else if (opcode == ASMOpcodes.GETFIELD) {
-                    val newMethodDescWithOriginCallerClass = "(L${fp.className};)" + descriptor
+                    val newMethodDescWithOriginCallerClass = "(L${fp.targetClassName};)" + descriptor
                     visitMethodInsn(
                         opcode = INVOKESTATIC,
-                        owner = fp.replacedClassName,
-                        methodName = fp.replacedMethodName,
+                        owner = fp.wrapperClassName,
+                        methodName = fp.wrapperMethodName,
                         descriptor = newMethodDescWithOriginCallerClass,
                         isInterface = false
                     )
@@ -86,17 +86,17 @@ class CaliperMethodVisitor(
         )
 
         // To match a pair of the `new` keyword and the `init()` method.
-        if (isNewOperationCodeFound) {
+        if (isNewOperationCodeFound.isNotBlank()) {
             val classProxies = proxyConfig.proxiedClasses
             for (cp in classProxies) {
                 if (opcode == INVOKESPECIAL
-                    && owner == cp.className
-                    && className != cp.replacedClassName
+                    && owner == cp.targetClassName
+                    && className != cp.newClassName
                 ) {
-                    isNewOperationCodeFound = false
+                    isNewOperationCodeFound = ""
                     superVisitor.visitMethodInsn(
                         INVOKESPECIAL,
-                        cp.replacedClassName,
+                        cp.newClassName,
                         methodName,
                         descriptor,
                         isInterface
@@ -108,9 +108,9 @@ class CaliperMethodVisitor(
 
         val methodProxies = proxyConfig.proxiedMethods
         for (mp in methodProxies) {
-            if (opcode == mp.opcode
-                && owner == mp.className
-                && methodName == mp.methodName
+            if (opcode == mp.targetOpcode
+                && owner == mp.targetClassName
+                && methodName == mp.targetMethodName
                 && descriptor != null // All sensitive data should have at least the output of an API call.
                 && className.contains(CALIPER_PACKAGE_FOR_WRAPPER_SPLIT_BY_SLASH).not()
             ) {
@@ -118,20 +118,20 @@ class CaliperMethodVisitor(
                 if (opcode == ASMOpcodes.INVOKESTATIC) {
                     visitMethodInsn(
                         opcode = INVOKESTATIC,
-                        owner = mp.replacedClassName,
-                        methodName = mp.replacedMethodName,
+                        owner = mp.wrapperClassName,
+                        methodName = mp.wrapperMethodName,
                         descriptor = descriptor,
                         isInterface = false
                     )
                 } else if (opcode == ASMOpcodes.INVOKEVIRTUAL) { // TODO: may have more opcodes
                     val newMethodDescWithOriginCallerClass = StringBuilder().append(descriptor.substring(0, 1))
-                        .append("L${mp.className};")
+                        .append("L${mp.targetClassName};")
                         .append(descriptor.substring(1, descriptor.length))
                         .toString()
                     visitMethodInsn(
                         opcode = INVOKESTATIC,
-                        owner = mp.replacedClassName,
-                        methodName = mp.replacedMethodName,
+                        owner = mp.wrapperClassName,
+                        methodName = mp.wrapperMethodName,
                         descriptor = newMethodDescWithOriginCallerClass,
                         isInterface = false
                     )
