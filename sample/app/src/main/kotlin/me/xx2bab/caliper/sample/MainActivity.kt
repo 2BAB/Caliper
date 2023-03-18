@@ -21,6 +21,11 @@ class MainActivity : AppCompatActivity() {
             startActivity(Intent(this, BatteryOptimizationActivity::class.java))
         }
 
+        Toast.makeText(
+            this,
+            LibrarySampleClass().commonMethodReturnsString(),
+            Toast.LENGTH_SHORT
+        ).show()
     }
 
 }

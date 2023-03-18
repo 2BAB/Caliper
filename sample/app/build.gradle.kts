@@ -91,11 +91,11 @@ dependencies {
 
 // Run `./gradlew clean assembleFullDebug` for testing
 caliper {
-    // Main feature flags. !!! Mandatory field.!!!
-    // Can not be lazily set, it's a valid only if you call it before "afterEvaluate{}".
-    // With below snippet, only "FullDebug" variant will be interacted with Caliper.
+    // Main feature flags (Mandatory).
+    // Can not be lazily set, it's valid only if you call it before "afterEvaluate{}".
     enableByVariant { variant ->
-//        variant.buildType == "debug" && variant.flavorName == "full"
+        // With below snippet, only "FullDebug" variant will be interacted with Caliper.
+        // variant.buildType == "debug" && variant.flavorName == "full"
         true
     }
 }
