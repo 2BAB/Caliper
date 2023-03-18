@@ -16,7 +16,7 @@ class CaliperMethodVisitor(
     private val logger: KLogger = DefaultKotlinLogger()
 ) : AdviceAdapter(ASM9, superVisitor, access, methodName, descriptor) {
 
-    private var isNewOperationCodeFound = false
+    private var isNewOperationCodeFound = ""
 
     override fun visitTypeInsn(opcode: Int, type: String?) {
         logger.debug(
@@ -25,7 +25,7 @@ class CaliperMethodVisitor(
         val classProxies = proxyConfig.proxiedClasses
         for (cp in classProxies) {
             if (opcode == NEW && type == cp.targetClassName) {
-                isNewOperationCodeFound = true
+                isNewOperationCodeFound = cp.targetClassName
                 superVisitor.visitTypeInsn(NEW, cp.newClassName)
                 return
             }
@@ -86,14 +86,14 @@ class CaliperMethodVisitor(
         )
 
         // To match a pair of the `new` keyword and the `init()` method.
-        if (isNewOperationCodeFound) {
+        if (isNewOperationCodeFound.isNotBlank()) {
             val classProxies = proxyConfig.proxiedClasses
             for (cp in classProxies) {
                 if (opcode == INVOKESPECIAL
                     && owner == cp.targetClassName
                     && className != cp.newClassName
                 ) {
-                    isNewOperationCodeFound = false
+                    isNewOperationCodeFound = ""
                     superVisitor.visitMethodInsn(
                         INVOKESPECIAL,
                         cp.newClassName,
