@@ -24,13 +24,13 @@ abstract class CaliperClassVisitorFactory :
     AsmClassVisitorFactory<CaliperClassVisitorFactoryParam> {
 
     override fun isInstrumentable(classData: ClassData): Boolean {
-        return parameters
-            .get()
-            .collectorServiceProp
-            .get()
+        val res = parameters.get()
+            .collectorServiceProp.get()
             .pullTransformExcludedList(parameters.get().variantCaliperConfiguration)
             .contains(classData.className)
             .not()
+        CaliperPlugin.logger.debug("isInstrumentable: ${classData.className} $res")
+        return res
     }
 
     override fun createClassVisitor(
@@ -38,10 +38,8 @@ abstract class CaliperClassVisitorFactory :
         nextClassVisitor: ClassVisitor
     ): ClassVisitor {
         val aggregation = parameters.get()
-            .collectorServiceProp
-            .get()
+            .collectorServiceProp.get()
             .collect(parameters.get().variantCaliperConfiguration)
-
         return CaliperClassVisitor(
             api = Opcodes.ASM9,
             classVisitor = nextClassVisitor,
