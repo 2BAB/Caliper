@@ -7,14 +7,16 @@ import android.provider.Settings
 import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.annotation.RequiresApi
+import me.xx2bab.caliper.runtime.Caliper
+import me.xx2bab.caliper.runtime.SignatureVisitor
 
 class PrivacyActivity : AppCompatActivity() {
 
     lateinit var outputTv: TextView
-    lateinit var expectedTv: TextView
+    lateinit var logTv: TextView
 
-    @RequiresApi(Build.VERSION_CODES.O)
-    lateinit var triggerButtons: List<TriggerButton>
+    lateinit var triggerButtonsBelow26: List<TriggerButton>
+    lateinit var triggerButtonsAbove26: List<TriggerButton>
 
     override fun onRequestPermissionsResult(
         requestCode: Int,
@@ -22,7 +24,7 @@ class PrivacyActivity : AppCompatActivity() {
         grantResults: IntArray
     ) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-        if(requestCode == 100) {
+        if (requestCode == 100) {
             outputTv.text = "true"
         }
     }
@@ -30,16 +32,17 @@ class PrivacyActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_privacy)
-        triggerButtons = listOf(
-            TriggerButton(
-                text = "getSerial()",
-                id = 10001,
-                expectedResult = "android/os/Build->getSerial",
-                onClickListener = {
-                    outputTv.text = Build.getSerial()
-                    expectedTv.text = ""
-                }
-            ),
+
+        // < 26, Android O
+        triggerButtonsBelow26 = listOf(
+//            TriggerButton(
+//                text = "getSerial()",
+//                id = 10001,
+//                expectedResult = "android/os/Build->getSerial",
+//                onClickListener = {
+//                    outputTv.text = Build.getSerial()
+//                }
+//            ),
             TriggerButton(
                 text = "SERIAL",
                 id = 10002,
@@ -47,14 +50,19 @@ class PrivacyActivity : AppCompatActivity() {
                 onClickListener = {
                     outputTv.text = Build.SERIAL
                 }
-            ),
+            ))
+
+        // >= 26, Android O
+        triggerButtonsAbove26 = listOf(
             TriggerButton(
                 text = "getString()",
                 id = 10003,
                 expectedResult = "android/provider/Settings\$Settings.Secure->getString",
                 onClickListener = {
-                    outputTv.text = Settings.Secure.getString(this.application.contentResolver,
-                        Settings.Secure.ANDROID_ID)
+                    outputTv.text = Settings.Secure.getString(
+                        this.application.contentResolver,
+                        Settings.Secure.ANDROID_ID
+                    )
                 }
             ),
             TriggerButton(
@@ -68,10 +76,23 @@ class PrivacyActivity : AppCompatActivity() {
         )
 
         outputTv = findViewById(R.id.return_content)
-        expectedTv = findViewById(R.id.expect_content)
+        logTv = findViewById(R.id.log_content)
         val buttonList = findViewById<LinearLayout>(R.id.button_list)
 
-        triggerButtons.forEach {
+        Caliper.accept(object : SignatureVisitor {
+            override fun visit(
+                className: String,
+                elementName: String,
+                parameterNames: Array<String>,
+                parameterValues: Array<Any>
+            ) {
+                logTv.text = "$className->$elementName"
+            }
+        })
+        triggerButtonsBelow26.forEach {
+            buttonList.addView(makeTriggerButton(this, it))
+        }
+        triggerButtonsAbove26.forEach {
             buttonList.addView(makeTriggerButton(this, it))
         }
 

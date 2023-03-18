@@ -13,7 +13,7 @@ android {
     compileSdk = 31
     defaultConfig {
         applicationId = "me.xx2bab.caliper.sample"
-        minSdk = 26
+        minSdk = 23
         targetSdk = 31
         versionCode = 1
         versionName = "1.0.0"
@@ -81,6 +81,7 @@ dependencies {
     implementation("androidx.constraintlayout:constraintlayout:2.1.3")
 
     caliper("me.2bab:caliper-runtime-privacy:+")
+    caliper("me.2bab:caliper-runtime-battery-optim:+")
     caliper(project(":custom-proxy"))
 
     testImplementation(deps.junit4)

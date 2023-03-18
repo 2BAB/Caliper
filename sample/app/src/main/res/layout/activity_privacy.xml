@@ -39,27 +39,10 @@
         android:layout_toEndOf="@id/return_title"
         android:text="" />
 
-    <TextView
-        android:id="@+id/expect_title"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@id/log_content"
-        android:layout_marginEnd="16dp"
-        android:text="Expect:" />
-
-    <TextView
-        android:id="@+id/expect_content"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@id/return_content"
-        android:layout_alignParentEnd="true"
-        android:layout_toEndOf="@id/log_content"
-        android:text="" />
-
     <ScrollView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@id/expect_content"
+        android:layout_below="@id/log_content"
         android:layout_alignParentBottom="true">
 
         <LinearLayout

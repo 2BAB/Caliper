@@ -14,16 +14,15 @@ import org.robolectric.annotation.Config
 
 @RunWith(RobolectricTestRunner::class)
 @Config(sdk = [28])
-class PrivacyActivityTest {
+class BatteryOptimizationActivityTest {
 
     @Test
-    fun `PrivacyActivity all buttons should invoke through Caliper proxy`() {
-        Robolectric.buildActivity(PrivacyActivity::class.java).use { controller ->
+    fun `BatteryOptimizationActivity all buttons should invoke through Caliper proxy`() {
+        Robolectric.buildActivity(BatteryOptimizationActivity::class.java).use { controller ->
             controller.setup() // Moves Activity to RESUMED state
-            val activity: PrivacyActivity = controller.get()
+            val activity: BatteryOptimizationActivity = controller.get()
             val outputTextView = activity.findViewById<TextView>(R.id.return_content)
-            val logTextView = activity.findViewById<TextView>(R.id.log_content)
-
+            var logReplica = ""
             Caliper.accept(object: SignatureVisitor {
                 override fun visit(
                     className: String,
@@ -31,13 +30,13 @@ class PrivacyActivityTest {
                     parameterNames: Array<String>,
                     parameterValues: Array<Any>
                 ) {
-                    logTextView.text = "$className->$elementName"
+                    logReplica = "$className->$elementName"
                 }
             })
-
             activity.triggerButtons.forEach {
-                activity.findViewById<Button>(it.id).performClick()
-                 assertThat(logTextView.text, `is`(it.expectedResult))
+                val but = activity.findViewById<Button>(it.id)
+                but.performClick()
+                assertThat(logReplica, `is`(it.expectedResult))
             }
         }
     }
