@@ -1,3 +1,5 @@
+@file:JvmName("ActivityProxy")
+
 package me.xx2bab.caliper.privacy
 
 import android.app.Activity
