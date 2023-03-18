@@ -53,13 +53,13 @@ abstract class CaliperProxyConfigCollectorService
                 excludeClassList = mutableSetOf()
                 collect(fc)
                 aggregatedProxyConfig.proxiedClasses.forEach {
-                    excludeClassList.add(it.newClassName)
+                    excludeClassList.add(it.newClassName.replace("/", "."))
                 }
                 aggregatedProxyConfig.proxiedMethods.forEach {
-                    excludeClassList.add(it.newClassName)
+                    excludeClassList.add(it.newClassName.replace("/", "."))
                 }
                 aggregatedProxyConfig.proxiedFields.forEach {
-                    excludeClassList.add(it.newClassName)
+                    excludeClassList.add(it.newClassName.replace("/", "."))
                 }
                 logger.info("Generate Transform-Exclude List: $excludeClassList")
             }
