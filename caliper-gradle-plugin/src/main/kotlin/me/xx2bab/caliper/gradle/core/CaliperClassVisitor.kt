@@ -1,14 +1,6 @@
 package me.xx2bab.caliper.gradle.core
 
-import kotlinx.serialization.json.Json
-import kotlinx.serialization.decodeFromString
-import kotlinx.serialization.encodeToString
-import kotlinx.serialization.json.decodeFromStream
-import me.xx2bab.caliper.gradle.CaliperPlugin
-import org.gradle.api.file.ConfigurableFileCollection
 import org.objectweb.asm.*
-import java.io.File
-import java.util.jar.JarFile
 
 class CaliperClassVisitor(
     private val api: Int,

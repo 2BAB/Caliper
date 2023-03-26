@@ -14,7 +14,7 @@ import org.objectweb.asm.Opcodes
 
 interface CaliperClassVisitorFactoryParam : InstrumentationParameters {
     @get:Classpath
-    val variantCaliperConfiguration: ConfigurableFileCollection
+    val variantCaliperConfigurationForJavaRes: ConfigurableFileCollection
 
     @get:Internal
     val collectorServiceProp: Property<CaliperProxyConfigCollectorService>
@@ -26,7 +26,7 @@ abstract class CaliperClassVisitorFactory :
     override fun isInstrumentable(classData: ClassData): Boolean {
         val res = parameters.get()
             .collectorServiceProp.get()
-            .pullTransformExcludedList(parameters.get().variantCaliperConfiguration)
+            .pullTransformExcludedList(parameters.get().variantCaliperConfigurationForJavaRes)
             .contains(classData.className)
             .not()
         CaliperPlugin.logger.debug("isInstrumentable: ${classData.className} $res")
@@ -37,9 +37,10 @@ abstract class CaliperClassVisitorFactory :
         classContext: ClassContext,
         nextClassVisitor: ClassVisitor
     ): ClassVisitor {
+//        CaliperPlugin.logger.info("CaliperClassVisitorFactory rerun ${parameters.get().variantCaliperConfiguration.files}")
         val aggregation = parameters.get()
             .collectorServiceProp.get()
-            .collect(parameters.get().variantCaliperConfiguration)
+            .collect(parameters.get().variantCaliperConfigurationForJavaRes)
         return CaliperClassVisitor(
             api = Opcodes.ASM9,
             classVisitor = nextClassVisitor,

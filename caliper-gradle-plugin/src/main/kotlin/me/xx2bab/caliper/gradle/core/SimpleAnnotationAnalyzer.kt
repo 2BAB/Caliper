@@ -44,7 +44,8 @@ class SimpleAnnotationAnalyzer(private val logger: KLogger) {
         result.files.forEach {
             val packageName = it.packageFqName.asString()
             it.declarations.forEach { decl ->
-                // TODO: support Java file analysis (current detekt settings does not recognize Java files)
+                // TODO: support Java file analysis,
+                //  current detekt settings does not recognize Java files
                 if (decl is KtClass) {
                     val clazz = decl
                     val className = clazz.nameAsSafeName.asString()

@@ -79,8 +79,9 @@ abstract class CaliperPlugin : Plugin<Project> {
 
                 val capVariantName = appVariant.name.capitalized()
                 val artifactType = Attribute.of("artifactType", String::class.java)
-                val variantCaliperConfiguration = project.configurations
-                    .maybeCreate("${appVariant.name}Caliper")
+
+                val variantCaliperConfigurationForJavaRes = project.configurations
+                    .maybeCreate("${appVariant.name}CaliperForRes")
                     .apply {
                         extendsFrom(caliperConfiguration)
                         isTransitive = false
@@ -108,7 +109,7 @@ abstract class CaliperPlugin : Plugin<Project> {
                         CaliperClassVisitorFactory::class.java,
                         InstrumentationScope.ALL
                     ) {
-                        it.variantCaliperConfiguration.from(variantCaliperConfiguration)
+                        it.variantCaliperConfigurationForJavaRes.from(variantCaliperConfigurationForJavaRes)
                         it.collectorServiceProp.set(proxyConfigCollector)
                     }
                 appVariant.instrumentation

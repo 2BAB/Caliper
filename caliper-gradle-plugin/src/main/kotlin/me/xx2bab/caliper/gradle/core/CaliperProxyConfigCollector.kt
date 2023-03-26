@@ -27,7 +27,7 @@ class CaliperProxyConfigCollector(private val logger: KLogger) {
                 val variantName = matchResult.groupValues[1]
                 collectFromSource(caliperDep, variantName, asmOpcodesClassFile.absolutePath)
             } else {
-                collectFromResJar(caliperDep)
+                collectFromBinary(caliperDep)
             }
             if (singleJson != null) {
                 proxyConfig.proxiedClasses.addAll(singleJson.proxiedClasses)
@@ -65,8 +65,8 @@ class CaliperProxyConfigCollector(private val logger: KLogger) {
         ).filter {
             File(it).exists() // TODO: may need to check all sub-directories that at least one file exists
         }
-
         val s = SimpleAnnotationAnalyzer(logger)
+        val start = System.currentTimeMillis()
         s.analyze(sourcePaths, object : SimpleAnnotationAnalyzer.Visitor {
             override fun visitMethodAnnotation(
                 annotation: String,
@@ -131,6 +131,8 @@ class CaliperProxyConfigCollector(private val logger: KLogger) {
             }
 
         })
+        val end = System.currentTimeMillis()
+        logger.info("CaliperProxyConfigCollector collects proxy config in ${end - start}ms")
         return proxyConfig
     }
 
@@ -138,7 +140,7 @@ class CaliperProxyConfigCollector(private val logger: KLogger) {
      * For jar package (downloaded remote artifact, extract from .aar).
      */
     @OptIn(ExperimentalSerializationApi::class)
-    private fun collectFromResJar(file: File): ProxyConfig? {
+    private fun collectFromBinary(file: File): ProxyConfig? {
         val jar = JarFile(file)
         val entry = jar.entries().asSequence().firstOrNull {
             it.name.matches(caliperMetadataFileNameRegex)
