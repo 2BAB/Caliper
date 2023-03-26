@@ -14,7 +14,7 @@ pluginManagement {
     plugins {
     	...    	
     	id("com.google.devtools.ksp") version "1.7.22-1.0.8" apply false
-    	id("me.2bab.caliper") version "0.2.0" apply false
+    	id("me.2bab.caliper") version "0.2.1" apply false
     }
 }
 
@@ -28,7 +28,7 @@ buildscript {
     dependencies {
         ...       
         classpath("com.google.devtools.ksp:symbol-processing-gradle-plugin:1.7.22-1.0.8")
-        classpath("me.2bab:caliper-gradle-plugin:0.2.0")       
+        classpath("me.2bab:caliper-gradle-plugin:0.2.1")       
     }
 }
 ```
@@ -154,8 +154,8 @@ Toast.makeText(
 The step 3 is a bit tedious(however empowering everyone to custom their own proxies), so we provide some pre-packaged proxies for you to use.
 
 ``` kotlin
-caliper("me.2bab:caliper-runtime-privacy:+")
-caliper("me.2bab:caliper-runtime-battery-optim:+")
+caliper("me.2bab:caliper-runtime-privacy:$latestVersion")
+caliper("me.2bab:caliper-runtime-battery-optim:$latestVersion")
 ```
 
 More details can be found in [caliper-runtime-privacy](./caliper-runtime-privacy) and [caliper-runtime-battery-optim](./caliper-runtime-battery-optim/).
@@ -166,7 +166,7 @@ More details can be found in [caliper-runtime-privacy](./caliper-runtime-privacy
 You can also leverage the `Caliper` class to do some runtime operations. For example, print the signature of all proxied calling in the app.
 
 ``` kotlin
-Caliper.accept(object : SignatureVisitor {
+Caliper.register(object : SignatureVisitor {
     override fun visit(
         className: String,
         elementName: String,

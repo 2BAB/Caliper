@@ -1,5 +1,10 @@
 # Caliper
 
+[![Maven Central](https://maven-badges.herokuapp.com/maven-central/me.2bab/caliper-gradle-plugin/badge.svg)](https://search.maven.org/artifact/me.2bab/caliper-gradle-plugin)
+[![Actions Status](https://github.com/2bab/Caliper/workflows/CI/badge.svg)](https://github.com/2bab/Caliper/actions)
+[![Apache 2](https://img.shields.io/badge/License-Apache%202-brightgreen.svg)](https://www.apache.org/licenses/LICENSE-2.0)
+
+
 🚧 **It's currently under incubating...**
 
 A monitor & controller for Android sensitive permissions/api calls based on bytecode transformation.
@@ -8,7 +13,6 @@ It supports adding custom proxy rules to intercept sensitive api calls with a si
 
 ```kotlin
 object ActivityProxy {
-
     @CaliperMethodProxy(
         className = "android/app/Activity",
         methodName = "requestPermissions",
@@ -35,7 +39,7 @@ Caliper is only supported & tested on latest 2 Minor versions of Android Gradle 
     
 | AGP Version | Recommended Gradle Version | Compiled Kotlin Version |   Compiled Kotlin Version    | Latest Support Version |
 |:-----------:|:--------------------------:|:-----------------------:|:----------------------------:|:----------------------:|
-|    8.0.x    |           8.0.2+           |         1.7.22          |         1.7.22-1.0.8         |         0.2.0          |
+|    8.0.x    |           8.0.2+           |         1.7.22          |         1.7.22-1.0.8         |         0.2.1          |
 
 
 ## Git Commit Check
