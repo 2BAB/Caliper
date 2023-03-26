@@ -6,7 +6,6 @@ import android.os.Bundle
 import android.provider.Settings
 import android.widget.LinearLayout
 import android.widget.TextView
-import androidx.annotation.RequiresApi
 import me.xx2bab.caliper.runtime.Caliper
 import me.xx2bab.caliper.runtime.SignatureVisitor
 
@@ -28,6 +27,14 @@ class PrivacyActivity : AppCompatActivity() {
             outputTv.text = "true"
         }
     }
+
+    fun test() {
+        requestPermissions(arrayOf("android.permission.READ_PHONE_STATE"), 100)
+    }
+
+//    fun test2() {
+//        ActivityProxy.requestPermissions(this, arrayOf("android.permission.READ_PHONE_STATE"), 100)
+//    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -79,7 +86,7 @@ class PrivacyActivity : AppCompatActivity() {
         logTv = findViewById(R.id.log_content)
         val buttonList = findViewById<LinearLayout>(R.id.button_list)
 
-        Caliper.accept(object : SignatureVisitor {
+        Caliper.register(object : SignatureVisitor {
             override fun visit(
                 className: String,
                 elementName: String,

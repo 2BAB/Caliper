@@ -23,7 +23,7 @@ class BatteryOptimizationActivityTest {
             val activity: BatteryOptimizationActivity = controller.get()
             val outputTextView = activity.findViewById<TextView>(R.id.return_content)
             var logReplica = ""
-            Caliper.accept(object: SignatureVisitor {
+            Caliper.register(object: SignatureVisitor {
                 override fun visit(
                     className: String,
                     elementName: String,

@@ -25,7 +25,7 @@ class PrivacyActivityTest {
             val logTextView = activity.findViewById<TextView>(R.id.log_content)
 
             var logReplica = ""
-            Caliper.accept(object : SignatureVisitor {
+            Caliper.register(object : SignatureVisitor {
                 override fun visit(
                     className: String,
                     elementName: String,
@@ -54,7 +54,7 @@ class PrivacyActivityTest {
             val logTextView = activity.findViewById<TextView>(R.id.log_content)
 
             var logReplica = ""
-            Caliper.accept(object : SignatureVisitor {
+            Caliper.register(object : SignatureVisitor {
                 override fun visit(
                     className: String,
                     elementName: String,

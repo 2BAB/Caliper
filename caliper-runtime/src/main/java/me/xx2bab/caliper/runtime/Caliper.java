@@ -16,8 +16,12 @@ public final class Caliper {
         }
     }
 
-    public static void accept(SignatureVisitor visitor) {
+    public static void register(SignatureVisitor visitor) {
         visitors.add(visitor);
+    }
+
+    public static void unregister(SignatureVisitor visitor) {
+        visitors.remove(visitor);
     }
 
 }

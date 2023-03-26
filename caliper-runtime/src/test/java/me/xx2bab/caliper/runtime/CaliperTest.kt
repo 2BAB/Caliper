@@ -15,7 +15,7 @@ class CaliperTest {
         val visitor = mockk<SignatureVisitor>()
         every { visitor.visit(className, elementName, paramKeys, paramValues) } just runs
 
-        Caliper.accept(visitor)
+        Caliper.register(visitor)
         Caliper.log(className, elementName, paramKeys, paramValues)
 
         verify { visitor.visit(className, elementName, paramKeys, paramValues) }

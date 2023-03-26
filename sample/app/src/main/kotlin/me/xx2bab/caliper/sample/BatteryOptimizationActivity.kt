@@ -5,8 +5,6 @@ import android.os.Build
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.os.PowerManager
-import android.os.PowerManager.WakeLock
-import android.provider.Settings
 import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.annotation.RequiresApi
@@ -59,7 +57,7 @@ class BatteryOptimizationActivity : AppCompatActivity() {
             buttonList.addView(makeTriggerButton(this, it))
         }
 
-        Caliper.accept(object: SignatureVisitor {
+        Caliper.register(object: SignatureVisitor {
             override fun visit(
                 className: String,
                 elementName: String,
