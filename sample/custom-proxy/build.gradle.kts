@@ -29,4 +29,5 @@ android {
 
 dependencies {
     implementation(project(":library"))
+    ksp("me.2bab:caliper-annotation-processor:+")
 }

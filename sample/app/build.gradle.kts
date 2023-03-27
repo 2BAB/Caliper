@@ -3,8 +3,6 @@ import org.jetbrains.kotlin.gradle.internal.Kapt3GradleSubplugin.Companion.isInc
 plugins {
     id("com.android.application")
     kotlin("android")
-
-    id("com.google.devtools.ksp") // Apply the KSP plugin ahead of Caliper
     id("me.2bab.caliper")
 }
 

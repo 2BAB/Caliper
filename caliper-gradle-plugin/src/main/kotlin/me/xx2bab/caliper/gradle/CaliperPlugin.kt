@@ -47,7 +47,6 @@ abstract class CaliperPlugin : Plugin<Project> {
 
         project.dependencies.apply {
             add("implementation", runtimeDep.format(BuildConfig.CALIPER_VERSION))
-            add("ksp", annotationProcessorDep.format(BuildConfig.CALIPER_VERSION))
         }
 
 
