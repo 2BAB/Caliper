@@ -14,7 +14,7 @@ pluginManagement {
     plugins {
     	...    	
     	id("com.google.devtools.ksp") version "1.7.22-1.0.8" apply false
-    	id("me.2bab.caliper") version "0.2.1" apply false
+    	id("me.2bab.caliper") version "0.2.2" apply false
     }
 }
 
@@ -28,7 +28,7 @@ buildscript {
     dependencies {
         ...       
         classpath("com.google.devtools.ksp:symbol-processing-gradle-plugin:1.7.22-1.0.8")
-        classpath("me.2bab:caliper-gradle-plugin:0.2.1")       
+        classpath("me.2bab:caliper-gradle-plugin:0.2.2")       
     }
 }
 ```
@@ -38,8 +38,7 @@ buildscript {
 ``` kotlin
 plugins {
     id("com.android.application")    
-    ...
-    id("com.google.devtools.ksp") // Apply the KSP plugin ahead of Caliper
+    ...   
     id("me.2bab.caliper")
 }
 
@@ -83,6 +82,7 @@ plugins {
 android {...}
 
 dependencies {
+    ksp("me.2bab:caliper-annotation-processor:$latestVersion")
     implementation(project(":library"))
 }                                  
 ```

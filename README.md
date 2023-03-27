@@ -39,7 +39,7 @@ Caliper is only supported & tested on latest 2 Minor versions of Android Gradle 
     
 | AGP Version | Recommended Gradle Version | Compiled Kotlin Version |   Compiled Kotlin Version    | Latest Support Version |
 |:-----------:|:--------------------------:|:-----------------------:|:----------------------------:|:----------------------:|
-|    8.0.x    |           8.0.2+           |         1.7.22          |         1.7.22-1.0.8         |         0.2.1          |
+|    8.0.x    |           8.0.2+           |         1.7.22          |         1.7.22-1.0.8         |         0.2.2          |
 
 
 ## Git Commit Check

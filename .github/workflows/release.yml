@@ -37,8 +37,8 @@ jobs:
           OSSRH_PASSWORD: ${{ secrets.OSSRH_PASSWORD }}
           GH_DEV_TOKEN: ${{ secrets.GH_DEV_TOKEN }}
 
-      - name: Upload Github Artifacts
-        uses: actions/upload-artifact@v2
-        with:
-          name: artifacts
-          path: Caliper/build/libs/
+#      - name: Upload Github Artifacts
+#        uses: actions/upload-artifact@v2
+#        with:
+#          name: artifacts
+#          path: ./build/libs/
