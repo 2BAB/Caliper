@@ -1,5 +1,6 @@
 package me.xx2bab.caliper.sample
 
+import android.provider.Settings
 import android.widget.Button
 import android.widget.TextView
 import me.xx2bab.caliper.runtime.Caliper
@@ -19,11 +20,12 @@ class PrivacyActivityTest {
     @Config(sdk = [28])
     fun `PrivacyActivity all buttons(requires API greater than 26) should invoke through Caliper proxy`() {
         Robolectric.buildActivity(PrivacyActivity::class.java).use { controller ->
+
             controller.setup() // Moves Activity to RESUMED state
             val activity: PrivacyActivity = controller.get()
             val outputTextView = activity.findViewById<TextView>(R.id.return_content)
             val logTextView = activity.findViewById<TextView>(R.id.log_content)
-
+            Settings.Secure.putString(activity.contentResolver, Settings.Secure.ANDROID_ID, "test")
             var logReplica = ""
             Caliper.register(object : SignatureVisitor {
                 override fun visit(
