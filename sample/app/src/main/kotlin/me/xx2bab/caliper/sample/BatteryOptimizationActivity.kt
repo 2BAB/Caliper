@@ -15,7 +15,6 @@ class BatteryOptimizationActivity : AppCompatActivity() {
     lateinit var outputTv: TextView
     lateinit var logTv: TextView
 
-    @RequiresApi(Build.VERSION_CODES.O)
     lateinit var triggerButtons: List<TriggerButton>
 
     override fun onCreate(savedInstanceState: Bundle?) {
