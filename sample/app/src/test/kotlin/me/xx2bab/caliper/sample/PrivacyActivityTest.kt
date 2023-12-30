@@ -20,7 +20,6 @@ class PrivacyActivityTest {
     @Config(sdk = [28])
     fun `PrivacyActivity all buttons(requires API greater than 26) should invoke through Caliper proxy`() {
         Robolectric.buildActivity(PrivacyActivity::class.java).use { controller ->
-
             controller.setup() // Moves Activity to RESUMED state
             val activity: PrivacyActivity = controller.get()
             val outputTextView = activity.findViewById<TextView>(R.id.return_content)
