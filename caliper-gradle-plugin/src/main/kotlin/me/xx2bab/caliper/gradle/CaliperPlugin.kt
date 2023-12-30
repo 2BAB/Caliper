@@ -12,7 +12,7 @@ import me.xx2bab.caliper.gradle.build.BuildConfig
 import me.xx2bab.caliper.gradle.core.GradleKLogger
 import org.gradle.api.Plugin
 import org.gradle.api.Project
-import org.gradle.api.attributes.*
+import org.gradle.api.attributes.Attribute
 import org.gradle.api.tasks.CacheableTask
 import org.gradle.configurationcache.extensions.capitalized
 import org.gradle.kotlin.dsl.getByType
@@ -113,20 +113,6 @@ abstract class CaliperPlugin : Plugin<Project> {
                     }
                 appVariant.instrumentation
                     .setAsmFramesComputationMode(FramesComputationMode.COPY_FRAMES)
-
-//                val modifyClassesTaskProvider =
-//                    project.tasks.register<ModifyClassesTask>("${appVariant.name}ModifyClasses") {
-//                        objectFactory = project.objects
-//                    }
-//                appVariant.artifacts
-//                    .forScope(ScopedArtifacts.Scope.ALL)
-//                    .use(modifyClassesTaskProvider)
-//                    .toTransform(
-//                        ScopedArtifact.CLASSES,
-//                        ModifyClassesTask::allJars,
-//                        ModifyClassesTask::allDirectories,
-//                        ModifyClassesTask::output
-//                    )
             }
         }
 

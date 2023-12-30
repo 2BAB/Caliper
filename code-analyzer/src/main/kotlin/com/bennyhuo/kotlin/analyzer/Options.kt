@@ -2,10 +2,7 @@ package com.bennyhuo.kotlin.analyzer
 
 import io.github.detekt.tooling.api.spec.ProcessingSpec
 import io.github.detekt.tooling.dsl.ProcessingSpecBuilder
-import org.jetbrains.kotlin.js.inline.util.replaceThisReference
 import java.io.File
-import java.io.PrintStream
-import java.lang.StringBuilder
 
 /**
  * Created by benny.
